@@ -2,6 +2,7 @@ class JRule
   constructor: (@opts={}) ->
     @setup_border_rulers()
     @setup_caliper()
+    @mouse_tracker = JRule.MouseTracker.get_tracker()
     console?.log 'jrule ready!'
 
   default_opts: ->
@@ -12,12 +13,31 @@ class JRule
   setup_caliper: ->
     @caliper = new JRule.Caliper()
 
+  toggle_crosshairs: ->
+    @mouse_tracker.toggle_crosshairs()
+
 class JRule.MouseTracker
   @get_tracker: ->
     @tracker ||= new JRule.MouseTracker()
 
-  constructor: ->
+  constructor: (@opts={}) ->
+    @crosshairs = null
+
+    @default_opts()
     @setup_events()
+
+    @setup_crosshairs() if @opts.show_crosshairs
+
+  default_opts: ->
+    defaults = 
+      show_crosshairs: true
+
+    #todo: use extend
+    for key, val of defaults
+      if !@opts.hasOwnProperty key
+        @opts[key] = val
+
+    @opts
 
   setup_events: ->
     document.addEventListener 'mousemove', (e) =>
@@ -25,6 +45,53 @@ class JRule.MouseTracker
       @mousey = e.clientY
       event = new Event 'jrule:mousemove'
       document.body.dispatchEvent event
+
+      @render_crosshairs() if @opts.show_crosshairs
+
+  setup_crosshairs: ->
+    @crosshairs = {}
+
+    create = (axis) ->
+      crosshair = document.createElement "div"
+      crosshair.style.position = "fixed"
+      crosshair.style.backgroundColor = "#333"
+      crosshair.style.zIndex = 4000
+      crosshair.className = "crosshair"
+
+      if axis == "x" || axis == "horizontal"
+        crosshair.style.width = "1px"
+        crosshair.style.top = 0
+        crosshair.style.bottom = 0
+        crosshair.style.left = "50%"
+      else
+        crosshair.style.height = "1px"
+        crosshair.style.left = 0
+        crosshair.style.right = 0
+        crosshair.style.top = "50%"
+
+      crosshair
+
+    @crosshairs.x = create 'x'
+    @crosshairs.y = create 'y'
+
+    for coord, c of @crosshairs
+      document.body.appendChild c
+
+  render_crosshairs: ->
+    @setup_crosshairs() if !@crosshairs
+    @crosshairs.x.style.left = "#{@mousex}px"
+    @crosshairs.y.style.top = "#{@mousey}px"
+
+  toggle_crosshairs: ->
+    @opts.show_crosshairs = !@opts.show_crosshairs
+
+    @remove_crosshairs() if !@opts.show_crosshairs
+
+  remove_crosshairs: ->
+    for coord, c of @crosshairs
+      document.body.removeChild c
+
+    @crosshairs = null
 
       
 class JRule.BorderRulers
@@ -93,7 +160,8 @@ class JRule.BorderRulers
       @rulers.left = left_ruler
   
     for name, ruler of @rulers
-      document.body.appendChild ruler
+      #investigate why this causes an error initially
+      document.body?.appendChild ruler
 
     @setup_ticks()
 
@@ -273,7 +341,15 @@ class JRule.Caliper
 
 
 document.JRule = JRule
-document.jruler = new document.JRule();
+
+ready = ->
+  document.jruler = new document.JRule();
+
+if document.readyState != "complete"
+  document.addEventListener 'DOMContentLoaded', ->
+    ready()
+else
+  ready()
 
 
 
