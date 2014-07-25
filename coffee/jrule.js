@@ -82,7 +82,7 @@
           }
           rule.className = "ruler";
           rule.style.position = "fixed";
-          rule.style.zIndex = 9999;
+          rule.style.zIndex = 4000;
           return rule;
         };
       })(this);
@@ -142,7 +142,7 @@
     };
 
     BorderRulers.prototype.setup_ticks = function() {
-      var div_pos, division_distance, doc_rect, i, j, mouse_x_tick, mouse_y_tick, side, tick_distance, tick_pos, ticks, _i, _j, _k, _len, _ref, _ref1;
+      var div_pos, division_distance, doc_rect, i, j, mouse_pos, mouse_x_tick, mouse_y_tick, side, tick_distance, tick_pos, ticks, _i, _j, _k, _len, _ref, _ref1;
       doc_rect = document.body.getBoundingClientRect();
       ticks = Math.ceil(doc_rect.width / this.opts.tick_distance);
       tick_distance = Math.round(doc_rect.width / ticks);
@@ -170,8 +170,21 @@
           mouse_y_tick = this.create_tick('left', Math.round(doc_rect.width / 2), 1);
           mouse_y_tick.style.backgroundColor = "#000";
           this.mouse_ticks.y = mouse_y_tick;
-          return this.rulers.left.appendChild(this.mouse_ticks.y);
+          this.rulers.left.appendChild(this.mouse_ticks.y);
         }
+        mouse_pos = document.createElement("div");
+        mouse_pos.style.position = "fixed";
+        mouse_pos.style.zIndex = 5000;
+        mouse_pos.style.left = 0;
+        mouse_pos.style.top = 0;
+        mouse_pos.style.padding = "6px";
+        mouse_pos.style.backgroundColor = "#888";
+        mouse_pos.style.color = "#fafafa";
+        mouse_pos.style.fontSize = "12px";
+        mouse_pos.style.fontFamily = "sans-serif";
+        mouse_pos.style.fontWeight = 100;
+        this.mouse_pos = mouse_pos;
+        return document.body.appendChild(this.mouse_pos);
       }
     };
 
@@ -218,8 +231,9 @@
           this.mouse_ticks.x.style.left = "" + this.mousex + "px";
         }
         if (this.mouse_ticks.y) {
-          return this.mouse_ticks.y.style.top = "" + this.mousey + "px";
+          this.mouse_ticks.y.style.top = "" + this.mousey + "px";
         }
+        return this.mouse_pos.innerText = "" + this.mousex + ", " + this.mousey;
       }
     };
 

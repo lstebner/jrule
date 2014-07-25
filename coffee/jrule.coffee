@@ -53,7 +53,7 @@ class JRule.BorderRulers
 
       rule.className = "ruler"
       rule.style.position = "fixed"
-      rule.style.zIndex = 9999 
+      rule.style.zIndex = 4000 
 
       rule
       
@@ -131,6 +131,20 @@ class JRule.BorderRulers
         @mouse_ticks.y = mouse_y_tick
         @rulers.left.appendChild @mouse_ticks.y
 
+      mouse_pos = document.createElement "div"
+      mouse_pos.style.position = "fixed"
+      mouse_pos.style.zIndex = 5000
+      mouse_pos.style.left = 0
+      mouse_pos.style.top = 0
+      mouse_pos.style.padding = "6px"
+      mouse_pos.style.backgroundColor = "#888"
+      mouse_pos.style.color = "#fafafa"
+      mouse_pos.style.fontSize = "12px"
+      mouse_pos.style.fontFamily = "sans-serif"
+      mouse_pos.style.fontWeight = 100
+      @mouse_pos = mouse_pos
+      document.body.appendChild @mouse_pos
+
 
   create_tick: (side, pos, height=1) ->
     new_tick = document.createElement("div")
@@ -162,6 +176,8 @@ class JRule.BorderRulers
         @mouse_ticks.x.style.left = "#{@mousex}px"
       if @mouse_ticks.y
         @mouse_ticks.y.style.top = "#{@mousey}px"
+
+      @mouse_pos.innerText = "#{@mousex}, #{@mousey}"
 
 
 
