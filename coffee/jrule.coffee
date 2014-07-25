@@ -273,7 +273,7 @@ class JRule.Caliper
 
 
 document.JRule = JRule
-
+document.jruler = new document.JRule();
 
 
 

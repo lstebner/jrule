@@ -353,4 +353,6 @@
 
   document.JRule = JRule;
 
+  document.jruler = new document.JRule();
+
 }).call(this);
