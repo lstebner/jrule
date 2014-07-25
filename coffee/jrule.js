@@ -153,7 +153,7 @@
       var defaults;
       defaults = {
         style: {
-          backgroundColor: "#f1f1f1",
+          backgroundColor: "#aaa",
           opacity: .5,
           tickColor: "#ccc",
           mouseTickColor: "#00f"
@@ -413,8 +413,7 @@
       indicator.style.position = "fixed";
       indicator.style.left = "" + this.start_pos[0] + "px";
       indicator.style.top = "" + this.start_pos[1] + "px";
-      indicator.style.backgroundColor = "#d8d8d8";
-      indicator.style.opacity = ".4";
+      indicator.style.backgroundColor = "rgba(100, 100, 100, .4)";
       indicator.style.zIndex = 3999;
       this.indicator = indicator;
       document.body.appendChild(this.indicator);
@@ -424,7 +423,7 @@
       indicator_size.style.bottom = 0;
       indicator_size.style.fontFamily = "sans-serif";
       indicator_size.style.fontSize = "12px";
-      indicator_size.style.backgroundColor = "#333";
+      indicator_size.style.backgroundColor = "#000";
       indicator_size.style.color = "#fff";
       indicator_size.style.padding = "3px";
       this.indicator_size = indicator_size;
