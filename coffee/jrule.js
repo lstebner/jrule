@@ -25,8 +25,12 @@
     function BorderRulers(opts) {
       this.opts = opts != null ? opts : {};
       this.rulers = {};
+      this.mouse_ticks = {};
+      this.mousex = 0;
+      this.mousey = 0;
       this.default_opts();
       this.setup_rulers();
+      this.setup_events();
     }
 
     BorderRulers.prototype.default_opts = function() {
@@ -43,7 +47,8 @@
         bottom: false,
         tick_distance: 100,
         rule_size: 25,
-        divisions: 8
+        divisions: 8,
+        show_mouse: true
       };
       return this.opts = defaults;
     };
@@ -107,18 +112,29 @@
       return this;
     };
 
+    BorderRulers.prototype.setup_events = function() {
+      if (this.opts.show_mouse) {
+        return document.addEventListener('mousemove', (function(_this) {
+          return function(e) {
+            _this.mousex = e.clientX;
+            _this.mousey = e.clientY;
+            return _this.render();
+          };
+        })(this));
+      }
+    };
+
     BorderRulers.prototype.tick_style = function(side) {
       var style;
       style = {
         position: "absolute",
-        display: "block"
+        display: "block",
+        backgroundColor: this.opts.style.tickColor
       };
       if (side === "top" || side === "bottom") {
-        style.borderRight = "1px solid " + this.opts.style.tickColor;
         style.width = "1px";
         style.height = "100%";
       } else {
-        style.borderTop = "1px solid " + this.opts.style.tickColor;
         style.width = "100%";
         style.height = "1px";
       }
@@ -126,38 +142,40 @@
     };
 
     BorderRulers.prototype.setup_ticks = function() {
-      var div_pos, division_distance, doc_rect, i, j, side, tick_distance, tick_pos, ticks, _i, _len, _ref, _results;
+      var div_pos, division_distance, doc_rect, i, j, mouse_x_tick, mouse_y_tick, side, tick_distance, tick_pos, ticks, _i, _j, _k, _len, _ref, _ref1;
       doc_rect = document.body.getBoundingClientRect();
       ticks = Math.ceil(doc_rect.width / this.opts.tick_distance);
       tick_distance = Math.round(doc_rect.width / ticks);
       division_distance = Math.round(tick_distance / this.opts.divisions);
       _ref = ['top', 'left'];
-      _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         side = _ref[_i];
-        _results.push((function() {
-          var _j, _results1;
-          _results1 = [];
-          for (i = _j = 0; 0 <= ticks ? _j < ticks : _j > ticks; i = 0 <= ticks ? ++_j : --_j) {
-            tick_pos = i * tick_distance;
-            this.draw_tick(side, tick_pos, .8);
-            _results1.push((function() {
-              var _k, _ref1, _results2;
-              _results2 = [];
-              for (j = _k = 0, _ref1 = this.opts.divisions; 0 <= _ref1 ? _k < _ref1 : _k > _ref1; j = 0 <= _ref1 ? ++_k : --_k) {
-                div_pos = j * division_distance + tick_pos;
-                _results2.push(this.draw_tick(side, div_pos, (j % 2 ? .3 : .5)));
-              }
-              return _results2;
-            }).call(this));
+        for (i = _j = 0; 0 <= ticks ? _j < ticks : _j > ticks; i = 0 <= ticks ? ++_j : --_j) {
+          tick_pos = i * tick_distance;
+          this.draw_tick(side, tick_pos, .8);
+          for (j = _k = 0, _ref1 = this.opts.divisions; 0 <= _ref1 ? _k < _ref1 : _k > _ref1; j = 0 <= _ref1 ? ++_k : --_k) {
+            div_pos = j * division_distance + tick_pos;
+            this.draw_tick(side, div_pos, (j % 2 ? .3 : .5));
           }
-          return _results1;
-        }).call(this));
+        }
       }
-      return _results;
+      if (this.opts.show_mouse) {
+        if (this.rulers.hasOwnProperty('top')) {
+          mouse_x_tick = this.create_tick('top', Math.round(doc_rect.width / 2), 1);
+          mouse_x_tick.style.backgroundColor = "#000";
+          this.mouse_ticks.x = mouse_x_tick;
+          this.rulers.top.appendChild(this.mouse_ticks.x);
+        }
+        if (this.rulers.hasOwnProperty('left')) {
+          mouse_y_tick = this.create_tick('left', Math.round(doc_rect.width / 2), 1);
+          mouse_y_tick.style.backgroundColor = "#000";
+          this.mouse_ticks.y = mouse_y_tick;
+          return this.rulers.left.appendChild(this.mouse_ticks.y);
+        }
+      }
     };
 
-    BorderRulers.prototype.draw_tick = function(side, pos, height) {
+    BorderRulers.prototype.create_tick = function(side, pos, height) {
       var key, new_tick, val, _ref;
       if (height == null) {
         height = 1;
@@ -176,7 +194,16 @@
         new_tick.style.top = "" + pos + "px";
         new_tick.style.width = "" + (100 * height) + "%";
       }
+      return new_tick;
+    };
+
+    BorderRulers.prototype.draw_tick = function(side, pos, height) {
+      var new_tick;
+      if (height == null) {
+        height = 1;
+      }
       if (this.rulers.hasOwnProperty(side)) {
+        new_tick = this.create_tick(side, pos, height);
         return this.rulers[side].appendChild(new_tick);
       } else {
         return false;
@@ -184,6 +211,17 @@
     };
 
     BorderRulers.prototype.destroy = function() {};
+
+    BorderRulers.prototype.render = function() {
+      if (this.opts.show_mouse) {
+        if (this.mouse_ticks.x) {
+          this.mouse_ticks.x.style.left = "" + this.mousex + "px";
+        }
+        if (this.mouse_ticks.y) {
+          return this.mouse_ticks.y.style.top = "" + this.mousey + "px";
+        }
+      }
+    };
 
     return BorderRulers;
 

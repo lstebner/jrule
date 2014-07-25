@@ -11,9 +11,13 @@ class JRule
 class JRule.BorderRulers
   constructor: (@opts={}) ->
     @rulers = {}
+    @mouse_ticks = {}
+    @mousex = 0
+    @mousey = 0
   
     @default_opts()
     @setup_rulers()
+    @setup_events()
     
   default_opts: ->
     defaults = 
@@ -28,6 +32,7 @@ class JRule.BorderRulers
       tick_distance: 100 #px
       rule_size: 25
       divisions: 8
+      show_mouse: true
 
     #todo: actual extend of defaults with given @opts
     @opts = defaults
@@ -76,17 +81,23 @@ class JRule.BorderRulers
     @setup = true
     @
 
+  setup_events: ->
+    if @opts.show_mouse
+      document.addEventListener 'mousemove', (e) =>
+        @mousex = e.clientX
+        @mousey = e.clientY
+        @render()
+
   tick_style: (side) ->
     style =
       position: "absolute"
       display: "block" 
+      backgroundColor: @opts.style.tickColor
 
     if side == "top" || side == "bottom"
-      style.borderRight = "1px solid #{@opts.style.tickColor}"
       style.width = "1px"
       style.height = "100%"
     else
-      style.borderTop = "1px solid #{@opts.style.tickColor}"
       style.width = "100%"
       style.height = "1px"
 
@@ -108,7 +119,20 @@ class JRule.BorderRulers
           div_pos = j * division_distance + tick_pos
           @draw_tick side, div_pos, (if j % 2 then .3 else .5)
 
-  draw_tick: (side, pos, height=1) ->
+    if @opts.show_mouse
+      if @rulers.hasOwnProperty 'top'
+        mouse_x_tick = @create_tick 'top', Math.round(doc_rect.width / 2), 1
+        mouse_x_tick.style.backgroundColor = "#000"
+        @mouse_ticks.x = mouse_x_tick
+        @rulers.top.appendChild @mouse_ticks.x
+      if @rulers.hasOwnProperty 'left'
+        mouse_y_tick = @create_tick 'left', Math.round(doc_rect.width / 2), 1
+        mouse_y_tick.style.backgroundColor = "#000"
+        @mouse_ticks.y = mouse_y_tick
+        @rulers.left.appendChild @mouse_ticks.y
+
+
+  create_tick: (side, pos, height=1) ->
     new_tick = document.createElement("div")
     for key, val of @tick_style(side)
       new_tick.style[key] = val
@@ -121,12 +145,23 @@ class JRule.BorderRulers
       new_tick.style.top = "#{pos}px"
       new_tick.style.width = "#{100*height}%"
 
+    new_tick
+
+  draw_tick: (side, pos, height=1) ->
     if @rulers.hasOwnProperty side
+      new_tick = @create_tick side, pos, height
       @rulers[side].appendChild new_tick 
     else
       false
 
   destroy: ->
+
+  render: ->
+    if @opts.show_mouse
+      if @mouse_ticks.x
+        @mouse_ticks.x.style.left = "#{@mousex}px"
+      if @mouse_ticks.y
+        @mouse_ticks.y.style.top = "#{@mousey}px"
 
 
 
