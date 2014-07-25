@@ -234,6 +234,8 @@ class JRule.Caliper
       @indicator.style.left = "#{x}px"
       @indicator.style.top = "#{y}px"
 
+      @indicator_size.innerText = "#{width}, #{height}"
+
   setup_indicators: ->
     indicator = document.createElement "div"
     indicator.style.position = "fixed"
@@ -245,7 +247,22 @@ class JRule.Caliper
     @indicator = indicator
     document.body.appendChild @indicator
 
+    indicator_size = document.createElement "div"
+    indicator_size.style.position = "absolute"
+    indicator_size.style.right = 0
+    indicator_size.style.bottom = 0
+    indicator_size.style.fontFamily = "sans-serif"
+    indicator_size.style.fontSize = "12px"
+    indicator_size.style.backgroundColor = "#333"
+    indicator_size.style.color = "#fff"
+    indicator_size.style.padding = "3px"
+    @indicator_size = indicator_size
+    @indicator.appendChild @indicator_size
+
+
+
   cleanup: ->
+    @indicator.removeChild @indicator_size
     document.body.removeChild @indicator
 
 

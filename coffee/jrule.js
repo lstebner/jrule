@@ -313,12 +313,13 @@
         this.indicator.style.width = "" + width + "px";
         this.indicator.style.height = "" + height + "px";
         this.indicator.style.left = "" + x + "px";
-        return this.indicator.style.top = "" + y + "px";
+        this.indicator.style.top = "" + y + "px";
+        return this.indicator_size.innerText = "" + width + ", " + height;
       }
     };
 
     Caliper.prototype.setup_indicators = function() {
-      var indicator;
+      var indicator, indicator_size;
       indicator = document.createElement("div");
       indicator.style.position = "fixed";
       indicator.style.left = "" + this.start_pos[0] + "px";
@@ -327,10 +328,22 @@
       indicator.style.opacity = ".4";
       indicator.style.zIndex = 3999;
       this.indicator = indicator;
-      return document.body.appendChild(this.indicator);
+      document.body.appendChild(this.indicator);
+      indicator_size = document.createElement("div");
+      indicator_size.style.position = "absolute";
+      indicator_size.style.right = 0;
+      indicator_size.style.bottom = 0;
+      indicator_size.style.fontFamily = "sans-serif";
+      indicator_size.style.fontSize = "12px";
+      indicator_size.style.backgroundColor = "#333";
+      indicator_size.style.color = "#fff";
+      indicator_size.style.padding = "3px";
+      this.indicator_size = indicator_size;
+      return this.indicator.appendChild(this.indicator_size);
     };
 
     Caliper.prototype.cleanup = function() {
+      this.indicator.removeChild(this.indicator_size);
       return document.body.removeChild(this.indicator);
     };
 
