@@ -6,6 +6,7 @@
     function JRule(opts) {
       this.opts = opts != null ? opts : {};
       this.setup_border_rulers();
+      this.setup_caliper();
       if (typeof console !== "undefined" && console !== null) {
         console.log('jrule ready!');
       }
@@ -17,7 +18,36 @@
       return this.border_rulers = new JRule.BorderRulers();
     };
 
+    JRule.prototype.setup_caliper = function() {
+      return this.caliper = new JRule.Caliper();
+    };
+
     return JRule;
+
+  })();
+
+  JRule.MouseTracker = (function() {
+    MouseTracker.get_tracker = function() {
+      return this.tracker || (this.tracker = new JRule.MouseTracker());
+    };
+
+    function MouseTracker() {
+      this.setup_events();
+    }
+
+    MouseTracker.prototype.setup_events = function() {
+      return document.addEventListener('mousemove', (function(_this) {
+        return function(e) {
+          var event;
+          _this.mousex = e.clientX;
+          _this.mousey = e.clientY;
+          event = new Event('jrule:mousemove');
+          return document.body.dispatchEvent(event);
+        };
+      })(this));
+    };
+
+    return MouseTracker;
 
   })();
 
@@ -26,8 +56,7 @@
       this.opts = opts != null ? opts : {};
       this.rulers = {};
       this.mouse_ticks = {};
-      this.mousex = 0;
-      this.mousey = 0;
+      this.mouse_tracker = JRule.MouseTracker.get_tracker();
       this.default_opts();
       this.setup_rulers();
       this.setup_events();
@@ -115,10 +144,8 @@
 
     BorderRulers.prototype.setup_events = function() {
       if (this.opts.show_mouse) {
-        return document.addEventListener('mousemove', (function(_this) {
+        return document.body.addEventListener('jrule:mousemove', (function(_this) {
           return function(e) {
-            _this.mousex = e.clientX;
-            _this.mousey = e.clientY;
             return _this.render();
           };
         })(this));
@@ -229,16 +256,85 @@
     BorderRulers.prototype.render = function() {
       if (this.opts.show_mouse) {
         if (this.mouse_ticks.x) {
-          this.mouse_ticks.x.style.left = "" + this.mousex + "px";
+          this.mouse_ticks.x.style.left = "" + this.mouse_tracker.mousex + "px";
         }
         if (this.mouse_ticks.y) {
-          this.mouse_ticks.y.style.top = "" + this.mousey + "px";
+          this.mouse_ticks.y.style.top = "" + this.mouse_tracker.mousey + "px";
         }
-        return this.mouse_pos.innerText = "" + this.mousex + ", " + this.mousey;
+        return this.mouse_pos.innerText = "" + this.mouse_tracker.mousex + ", " + this.mouse_tracker.mousey;
       }
     };
 
     return BorderRulers;
+
+  })();
+
+  JRule.Caliper = (function() {
+    function Caliper(opts) {
+      this.opts = opts != null ? opts : {};
+      this.mouse_tracker = JRule.MouseTracker.get_tracker();
+      this.setup_events();
+    }
+
+    Caliper.prototype.setup_events = function() {
+      document.addEventListener('keydown', (function(_this) {
+        return function(e) {
+          var keyup_fn;
+          if (e.keyCode === 16) {
+            _this.measuring = true;
+            _this.start_pos = [_this.mouse_tracker.mousex, _this.mouse_tracker.mousey];
+            _this.setup_indicators();
+            console.log('start pos', _this.start_pos);
+            keyup_fn = function() {
+              _this.measuring = false;
+              _this.end_pos = [_this.mouse_tracker.mousex, _this.mouse_tracker.mousey];
+              console.log('end pos', _this.end_pos);
+              document.removeEventListener('keyup', keyup_fn);
+              return _this.cleanup();
+            };
+            return document.addEventListener('keyup', keyup_fn);
+          }
+        };
+      })(this));
+      return document.body.addEventListener('jrule:mousemove', (function(_this) {
+        return function() {
+          return _this.render();
+        };
+      })(this));
+    };
+
+    Caliper.prototype.render = function() {
+      var height, width, x, y;
+      if (this.measuring) {
+        x = Math.min(this.mouse_tracker.mousex, this.start_pos[0]);
+        y = Math.min(this.mouse_tracker.mousey, this.start_pos[1]);
+        width = Math.max(this.mouse_tracker.mousex, this.start_pos[0]) - Math.min(this.mouse_tracker.mousex, this.start_pos[0]);
+        height = Math.max(this.mouse_tracker.mousey, this.start_pos[1]) - Math.min(this.mouse_tracker.mousey, this.start_pos[1]);
+        this.indicator.style.width = "" + width + "px";
+        this.indicator.style.height = "" + height + "px";
+        this.indicator.style.left = "" + x + "px";
+        return this.indicator.style.top = "" + y + "px";
+      }
+    };
+
+    Caliper.prototype.setup_indicators = function() {
+      var indicator;
+      indicator = document.createElement("div");
+      indicator.style.position = "fixed";
+      indicator.style.left = "" + this.start_pos[0] + "px";
+      indicator.style.top = "" + this.start_pos[1] + "px";
+      indicator.style.backgroundColor = "#d8d8d8";
+      indicator.style.opacity = ".4";
+      indicator.style.zIndex = 3999;
+      this.indicator = indicator;
+      return document.body.appendChild(this.indicator);
+    };
+
+    Caliper.prototype.cleanup = function() {
+      return document.body.removeChild(this.indicator);
+    };
+
+    return Caliper;
 
   })();
 

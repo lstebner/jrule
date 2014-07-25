@@ -1,19 +1,37 @@
 class JRule
   constructor: (@opts={}) ->
     @setup_border_rulers()
+    @setup_caliper()
     console?.log 'jrule ready!'
 
   default_opts: ->
 
   setup_border_rulers: ->
     @border_rulers = new JRule.BorderRulers()
+
+  setup_caliper: ->
+    @caliper = new JRule.Caliper()
+
+class JRule.MouseTracker
+  @get_tracker: ->
+    @tracker ||= new JRule.MouseTracker()
+
+  constructor: ->
+    @setup_events()
+
+  setup_events: ->
+    document.addEventListener 'mousemove', (e) =>
+      @mousex = e.clientX
+      @mousey = e.clientY
+      event = new Event 'jrule:mousemove'
+      document.body.dispatchEvent event
+
       
 class JRule.BorderRulers
   constructor: (@opts={}) ->
     @rulers = {}
     @mouse_ticks = {}
-    @mousex = 0
-    @mousey = 0
+    @mouse_tracker = JRule.MouseTracker.get_tracker()
   
     @default_opts()
     @setup_rulers()
@@ -84,9 +102,7 @@ class JRule.BorderRulers
 
   setup_events: ->
     if @opts.show_mouse
-      document.addEventListener 'mousemove', (e) =>
-        @mousex = e.clientX
-        @mousey = e.clientY
+      document.body.addEventListener 'jrule:mousemove', (e) =>
         @render()
 
   tick_style: (side) ->
@@ -174,12 +190,63 @@ class JRule.BorderRulers
   render: ->
     if @opts.show_mouse
       if @mouse_ticks.x
-        @mouse_ticks.x.style.left = "#{@mousex}px"
+        @mouse_ticks.x.style.left = "#{@mouse_tracker.mousex}px"
       if @mouse_ticks.y
-        @mouse_ticks.y.style.top = "#{@mousey}px"
+        @mouse_ticks.y.style.top = "#{@mouse_tracker.mousey}px"
 
-      @mouse_pos.innerText = "#{@mousex}, #{@mousey}"
+      @mouse_pos.innerText = "#{@mouse_tracker.mousex}, #{@mouse_tracker.mousey}"
 
+
+
+class JRule.Caliper
+  constructor: (@opts={}) ->
+    @mouse_tracker = JRule.MouseTracker.get_tracker()
+    @setup_events()
+
+  setup_events: ->
+    document.addEventListener 'keydown', (e) =>
+      if e.keyCode == 16
+        @measuring = true
+        @start_pos = [@mouse_tracker.mousex, @mouse_tracker.mousey]
+        @setup_indicators()
+        console.log 'start pos', @start_pos
+
+        keyup_fn = =>
+          @measuring = false
+          @end_pos = [@mouse_tracker.mousex, @mouse_tracker.mousey]
+          console.log 'end pos', @end_pos
+          document.removeEventListener 'keyup', keyup_fn
+          @cleanup()
+
+        document.addEventListener 'keyup', keyup_fn
+
+    document.body.addEventListener 'jrule:mousemove', =>
+      @render()
+
+  render: ->
+    if @measuring
+      x = Math.min(@mouse_tracker.mousex, @start_pos[0])
+      y = Math.min(@mouse_tracker.mousey, @start_pos[1])
+      width = Math.max(@mouse_tracker.mousex, @start_pos[0]) -  Math.min(@mouse_tracker.mousex, @start_pos[0])
+      height = Math.max(@mouse_tracker.mousey, @start_pos[1]) -  Math.min(@mouse_tracker.mousey, @start_pos[1])
+      @indicator.style.width = "#{width}px"
+      @indicator.style.height = "#{height}px"
+      @indicator.style.left = "#{x}px"
+      @indicator.style.top = "#{y}px"
+
+  setup_indicators: ->
+    indicator = document.createElement "div"
+    indicator.style.position = "fixed"
+    indicator.style.left = "#{@start_pos[0]}px"
+    indicator.style.top = "#{@start_pos[1]}px"
+    indicator.style.backgroundColor = "#d8d8d8"
+    indicator.style.opacity = ".4"
+    indicator.style.zIndex = 3999
+    @indicator = indicator
+    document.body.appendChild @indicator
+
+  cleanup: ->
+    document.body.removeChild @indicator
 
 
 
