@@ -39,7 +39,8 @@
         style: {
           backgroundColor: "#f1f1f1",
           opacity: .5,
-          tickColor: "#888"
+          tickColor: "#ccc",
+          mouseTickColor: "#00f"
         },
         top: true,
         left: true,
@@ -162,13 +163,13 @@
       if (this.opts.show_mouse) {
         if (this.rulers.hasOwnProperty('top')) {
           mouse_x_tick = this.create_tick('top', Math.round(doc_rect.width / 2), 1);
-          mouse_x_tick.style.backgroundColor = "#000";
+          mouse_x_tick.style.backgroundColor = "" + this.opts.style.mouseTickColor;
           this.mouse_ticks.x = mouse_x_tick;
           this.rulers.top.appendChild(this.mouse_ticks.x);
         }
         if (this.rulers.hasOwnProperty('left')) {
           mouse_y_tick = this.create_tick('left', Math.round(doc_rect.width / 2), 1);
-          mouse_y_tick.style.backgroundColor = "#000";
+          mouse_y_tick.style.backgroundColor = "" + this.opts.style.mouseTickColor;
           this.mouse_ticks.y = mouse_y_tick;
           this.rulers.left.appendChild(this.mouse_ticks.y);
         }

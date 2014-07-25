@@ -24,7 +24,8 @@ class JRule.BorderRulers
       style:
         backgroundColor: "#f1f1f1"
         opacity: .5
-        tickColor: "#888"
+        tickColor: "#ccc"
+        mouseTickColor: "#00f"
       top: true
       left: true
       right: false
@@ -122,12 +123,12 @@ class JRule.BorderRulers
     if @opts.show_mouse
       if @rulers.hasOwnProperty 'top'
         mouse_x_tick = @create_tick 'top', Math.round(doc_rect.width / 2), 1
-        mouse_x_tick.style.backgroundColor = "#000"
+        mouse_x_tick.style.backgroundColor = "#{@opts.style.mouseTickColor}"
         @mouse_ticks.x = mouse_x_tick
         @rulers.top.appendChild @mouse_ticks.x
       if @rulers.hasOwnProperty 'left'
         mouse_y_tick = @create_tick 'left', Math.round(doc_rect.width / 2), 1
-        mouse_y_tick.style.backgroundColor = "#000"
+        mouse_y_tick.style.backgroundColor = "#{@opts.style.mouseTickColor}"
         @mouse_ticks.y = mouse_y_tick
         @rulers.left.appendChild @mouse_ticks.y
 
