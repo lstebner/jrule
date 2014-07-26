@@ -341,6 +341,24 @@ class JRule.Caliper
       @indicator.style.left = "#{x}px"
       @indicator.style.top = "#{y}px"
 
+      h_dir = if @start_pos[0] > @mouse_tracker.mousex then "left" else "right"
+      v_dir = if @start_pos[1] > @mouse_tracker.mousey then "up" else "down"
+      @drag_direction = [h_dir, v_dir]
+
+      if h_dir == "left"
+        @indicator_size.style.left = 0
+        @indicator_size.style.right = "auto"
+      else
+        @indicator_size.style.right = 0
+        @indicator_size.style.left = "auto"
+
+      if v_dir == "up"
+        @indicator_size.style.top = 0
+        @indicator_size.style.bottom = "auto"
+      else
+        @indicator_size.style.bottom = 0
+        @indicator_size.style.top = "auto"
+
       @indicator_size.innerText = "#{width}, #{height}"
 
   setup_indicators: ->

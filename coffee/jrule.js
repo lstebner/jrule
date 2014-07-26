@@ -458,7 +458,7 @@
     };
 
     Caliper.prototype.render = function() {
-      var height, width, x, y;
+      var h_dir, height, v_dir, width, x, y;
       if (this.measuring) {
         x = Math.min(this.mouse_tracker.mousex, this.start_pos[0]);
         y = Math.min(this.mouse_tracker.mousey, this.start_pos[1]);
@@ -468,6 +468,23 @@
         this.indicator.style.height = "" + height + "px";
         this.indicator.style.left = "" + x + "px";
         this.indicator.style.top = "" + y + "px";
+        h_dir = this.start_pos[0] > this.mouse_tracker.mousex ? "left" : "right";
+        v_dir = this.start_pos[1] > this.mouse_tracker.mousey ? "up" : "down";
+        this.drag_direction = [h_dir, v_dir];
+        if (h_dir === "left") {
+          this.indicator_size.style.left = 0;
+          this.indicator_size.style.right = "auto";
+        } else {
+          this.indicator_size.style.right = 0;
+          this.indicator_size.style.left = "auto";
+        }
+        if (v_dir === "up") {
+          this.indicator_size.style.top = 0;
+          this.indicator_size.style.bottom = "auto";
+        } else {
+          this.indicator_size.style.bottom = 0;
+          this.indicator_size.style.top = "auto";
+        }
         return this.indicator_size.innerText = "" + width + ", " + height;
       }
     };
