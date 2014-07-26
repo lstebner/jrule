@@ -22,6 +22,15 @@ Hold down shift (click anywhere on the body once if this doesn't work the first 
 
 If you want to toggle the crosshairs, simply pop open the console and type `document.jruler.toggle_crosshairs()`.
 
+### Keyboard Controls
+
+(if any of these don't seem to be working, click the body once to give focus then try)
+
+- "r" - toggle visibility of rulers
+- "c" - toggle visibility of crosshairs
+- "+/-" - increase/decrease the size of the crosshairs
+- "shift" - hold to measure while moving the mouse
+
 ## Config
 
 JRule will be highly configurable at some point, but is still in very early development so none of the options are exposed yet. 
