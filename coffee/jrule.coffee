@@ -151,6 +151,7 @@ class JRule.BorderRulers
       rule_size: 25
       divisions: 8
       show_mouse: true
+      show_labels: true
 
     #todo: actual extend of defaults with given @opts
     @opts = defaults
@@ -221,6 +222,27 @@ class JRule.BorderRulers
 
     style
 
+  create_label: (side, pos) ->
+    label = document.createElement "div"
+    label.className = "tick_label"
+    label.innerText = "#{pos}px"
+    label.style.position = "absolute"
+    label.style.fontSize = "10px"
+    label.style.fontFamily = "sans-serif"
+
+    if side == "top"
+      label.style.left = "#{pos}px"
+      label.style.bottom = "2px"
+      label.style.marginLeft = "-14px"
+    else
+      label.style.top = "#{pos}px"
+      label.style.left = "4px"
+      label.style["-webkit-transform"] = "rotate(-90deg)"
+      label.style["transform"] = "rotate(-90deg)"
+      label.style["-moz-transform"] = "rotate(-90deg)"
+
+    label
+
   setup_ticks: ->
     doc_rect = document.body.getBoundingClientRect()
 
@@ -230,10 +252,14 @@ class JRule.BorderRulers
 
     for side in ['top', 'left']
       for i in [0...ticks]
-        tick_pos = i * tick_distance
-        @draw_tick side, tick_pos, .8
+        tick_pos = i * @opts.tick_distance
+        @draw_tick side, tick_pos, 1, { backgroundColor: "#666" }
 
-        for j in [0...@opts.divisions]
+        if @opts.show_labels
+          tick_label = @create_label side, tick_pos
+          @rulers[side].appendChild tick_label
+
+        for j in [1...@opts.divisions]
           div_pos = j * division_distance + tick_pos
           @draw_tick side, div_pos, (if j % 2 then .3 else .5)
 
@@ -264,10 +290,13 @@ class JRule.BorderRulers
       document.body.appendChild @mouse_pos
 
 
-  create_tick: (side, pos, height=1) ->
+  create_tick: (side, pos, height=1, style_overrides={}) ->
     new_tick = document.createElement("div")
     for key, val of @tick_style(side)
-      new_tick.style[key] = val
+      if style_overrides.hasOwnProperty key
+        new_tick.style[key] = style_overrides[key]
+      else
+        new_tick.style[key] = val
     new_tick.className = "tick"
 
     if side == "top" || side == "bottom"
@@ -279,9 +308,10 @@ class JRule.BorderRulers
 
     new_tick
 
-  draw_tick: (side, pos, height=1) ->
+  draw_tick: (side, pos, height=1, style_overrides={}) ->
     if @rulers.hasOwnProperty side
-      new_tick = @create_tick side, pos, height
+      new_tick = @create_tick side, pos, height, style_overrides
+
       @rulers[side].appendChild new_tick 
     else
       false
@@ -312,7 +342,7 @@ class JRule.Caliper
 
   setup_events: ->
     document.addEventListener 'keydown', (e) =>
-      if e.keyCode == 16
+      if e.keyCode == 16 #shift
         @measuring = true
         @start_pos = [@mouse_tracker.mousex, @mouse_tracker.mousey]
         @setup_indicators()

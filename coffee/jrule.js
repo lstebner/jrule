@@ -217,7 +217,8 @@
         tick_distance: 100,
         rule_size: 25,
         divisions: 8,
-        show_mouse: true
+        show_mouse: true,
+        show_labels: true
       };
       return this.opts = defaults;
     };
@@ -311,8 +312,30 @@
       return style;
     };
 
+    BorderRulers.prototype.create_label = function(side, pos) {
+      var label;
+      label = document.createElement("div");
+      label.className = "tick_label";
+      label.innerText = "" + pos + "px";
+      label.style.position = "absolute";
+      label.style.fontSize = "10px";
+      label.style.fontFamily = "sans-serif";
+      if (side === "top") {
+        label.style.left = "" + pos + "px";
+        label.style.bottom = "2px";
+        label.style.marginLeft = "-14px";
+      } else {
+        label.style.top = "" + pos + "px";
+        label.style.left = "4px";
+        label.style["-webkit-transform"] = "rotate(-90deg)";
+        label.style["transform"] = "rotate(-90deg)";
+        label.style["-moz-transform"] = "rotate(-90deg)";
+      }
+      return label;
+    };
+
     BorderRulers.prototype.setup_ticks = function() {
-      var div_pos, division_distance, doc_rect, i, j, mouse_pos, mouse_x_tick, mouse_y_tick, side, tick_distance, tick_pos, ticks, _i, _j, _k, _len, _ref, _ref1;
+      var div_pos, division_distance, doc_rect, i, j, mouse_pos, mouse_x_tick, mouse_y_tick, side, tick_distance, tick_label, tick_pos, ticks, _i, _j, _k, _len, _ref, _ref1;
       doc_rect = document.body.getBoundingClientRect();
       ticks = Math.ceil(doc_rect.width / this.opts.tick_distance);
       tick_distance = Math.round(doc_rect.width / ticks);
@@ -321,9 +344,15 @@
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         side = _ref[_i];
         for (i = _j = 0; 0 <= ticks ? _j < ticks : _j > ticks; i = 0 <= ticks ? ++_j : --_j) {
-          tick_pos = i * tick_distance;
-          this.draw_tick(side, tick_pos, .8);
-          for (j = _k = 0, _ref1 = this.opts.divisions; 0 <= _ref1 ? _k < _ref1 : _k > _ref1; j = 0 <= _ref1 ? ++_k : --_k) {
+          tick_pos = i * this.opts.tick_distance;
+          this.draw_tick(side, tick_pos, 1, {
+            backgroundColor: "#666"
+          });
+          if (this.opts.show_labels) {
+            tick_label = this.create_label(side, tick_pos);
+            this.rulers[side].appendChild(tick_label);
+          }
+          for (j = _k = 1, _ref1 = this.opts.divisions; 1 <= _ref1 ? _k < _ref1 : _k > _ref1; j = 1 <= _ref1 ? ++_k : --_k) {
             div_pos = j * division_distance + tick_pos;
             this.draw_tick(side, div_pos, (j % 2 ? .3 : .5));
           }
@@ -358,16 +387,23 @@
       }
     };
 
-    BorderRulers.prototype.create_tick = function(side, pos, height) {
+    BorderRulers.prototype.create_tick = function(side, pos, height, style_overrides) {
       var key, new_tick, val, _ref;
       if (height == null) {
         height = 1;
+      }
+      if (style_overrides == null) {
+        style_overrides = {};
       }
       new_tick = document.createElement("div");
       _ref = this.tick_style(side);
       for (key in _ref) {
         val = _ref[key];
-        new_tick.style[key] = val;
+        if (style_overrides.hasOwnProperty(key)) {
+          new_tick.style[key] = style_overrides[key];
+        } else {
+          new_tick.style[key] = val;
+        }
       }
       new_tick.className = "tick";
       if (side === "top" || side === "bottom") {
@@ -380,13 +416,16 @@
       return new_tick;
     };
 
-    BorderRulers.prototype.draw_tick = function(side, pos, height) {
+    BorderRulers.prototype.draw_tick = function(side, pos, height, style_overrides) {
       var new_tick;
       if (height == null) {
         height = 1;
       }
+      if (style_overrides == null) {
+        style_overrides = {};
+      }
       if (this.rulers.hasOwnProperty(side)) {
-        new_tick = this.create_tick(side, pos, height);
+        new_tick = this.create_tick(side, pos, height, style_overrides);
         return this.rulers[side].appendChild(new_tick);
       } else {
         return false;
