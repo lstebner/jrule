@@ -356,6 +356,7 @@ class JRule.Caliper
         @measuring = true
         @start_pos = [@mouse_tracker.mousex, @mouse_tracker.mousey]
         @mark_spot_with_crosshair @start_pos
+        document.body.style.cursor = "none"
         @setup_indicators()
 
         keyup_fn = =>
@@ -437,6 +438,8 @@ class JRule.Caliper
       document.body.removeChild c
 
     @crosshairs = []
+
+    document.body.style.cursor = "default"
 
 
 

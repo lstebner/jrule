@@ -500,6 +500,7 @@
             _this.measuring = true;
             _this.start_pos = [_this.mouse_tracker.mousex, _this.mouse_tracker.mousey];
             _this.mark_spot_with_crosshair(_this.start_pos);
+            document.body.style.cursor = "none";
             _this.setup_indicators();
             keyup_fn = function() {
               _this.measuring = false;
@@ -595,7 +596,8 @@
         c = _ref[_i];
         document.body.removeChild(c);
       }
-      return this.crosshairs = [];
+      this.crosshairs = [];
+      return document.body.style.cursor = "default";
     };
 
     return Caliper;
