@@ -48,6 +48,50 @@
 
   })();
 
+  JRule.Crosshair = (function() {
+    function Crosshair() {}
+
+    Crosshair.create = function(axis, pos, style) {
+      var crosshair, key, style_defaults, val;
+      if (pos == null) {
+        pos = "50%";
+      }
+      if (style == null) {
+        style = {};
+      }
+      style_defaults = {
+        crosshairColor: "rgba(100, 100, 100, .5)",
+        crosshairThickness: 1
+      };
+      for (key in style_defaults) {
+        val = style_defaults[key];
+        if (!style.hasOwnProperty(key)) {
+          style[key] = val;
+        }
+      }
+      crosshair = document.createElement("div");
+      crosshair.style.position = "fixed";
+      crosshair.style.backgroundColor = "" + style.crosshairColor;
+      crosshair.style.zIndex = 4000;
+      crosshair.className = "crosshair";
+      if (axis === "x" || axis === "horizontal") {
+        crosshair.style.width = "" + style.crosshairThickness + "px";
+        crosshair.style.top = 0;
+        crosshair.style.bottom = 0;
+        crosshair.style.left = "" + pos;
+      } else {
+        crosshair.style.height = "" + style.crosshairThickness + "px";
+        crosshair.style.left = 0;
+        crosshair.style.right = 0;
+        crosshair.style.top = "" + pos;
+      }
+      return crosshair;
+    };
+
+    return Crosshair;
+
+  })();
+
   JRule.MouseTracker = (function() {
     MouseTracker.get_tracker = function() {
       return this.tracker || (this.tracker = new JRule.MouseTracker());
@@ -124,32 +168,10 @@
     };
 
     MouseTracker.prototype.setup_crosshairs = function() {
-      var c, coord, create, _ref, _results;
+      var c, coord, _ref, _results;
       this.crosshairs = {};
-      create = (function(_this) {
-        return function(axis) {
-          var crosshair;
-          crosshair = document.createElement("div");
-          crosshair.style.position = "fixed";
-          crosshair.style.backgroundColor = "" + _this.opts.style.crosshairColor;
-          crosshair.style.zIndex = 4000;
-          crosshair.className = "crosshair";
-          if (axis === "x" || axis === "horizontal") {
-            crosshair.style.width = "" + _this.opts.style.crosshairThickness + "px";
-            crosshair.style.top = 0;
-            crosshair.style.bottom = 0;
-            crosshair.style.left = "50%";
-          } else {
-            crosshair.style.height = "" + _this.opts.style.crosshairThickness + "px";
-            crosshair.style.left = 0;
-            crosshair.style.right = 0;
-            crosshair.style.top = "50%";
-          }
-          return crosshair;
-        };
-      })(this);
-      this.crosshairs.x = create('x');
-      this.crosshairs.y = create('y');
+      this.crosshairs.x = JRule.Crosshair.create('x', "50%", this.opts.style);
+      this.crosshairs.y = JRule.Crosshair.create('y', "50%", this.opts.style);
       _ref = this.crosshairs;
       _results = [];
       for (coord in _ref) {
@@ -466,6 +488,7 @@
     function Caliper(opts) {
       this.opts = opts != null ? opts : {};
       this.mouse_tracker = JRule.MouseTracker.get_tracker();
+      this.crosshairs = [];
       this.setup_events();
     }
 
@@ -476,12 +499,11 @@
           if (e.keyCode === 16) {
             _this.measuring = true;
             _this.start_pos = [_this.mouse_tracker.mousex, _this.mouse_tracker.mousey];
+            _this.mark_spot_with_crosshair(_this.start_pos);
             _this.setup_indicators();
-            console.log('start pos', _this.start_pos);
             keyup_fn = function() {
               _this.measuring = false;
               _this.end_pos = [_this.mouse_tracker.mousex, _this.mouse_tracker.mousey];
-              console.log('end pos', _this.end_pos);
               document.removeEventListener('keyup', keyup_fn);
               return _this.cleanup();
             };
@@ -551,9 +573,29 @@
       return this.indicator.appendChild(this.indicator_size);
     };
 
+    Caliper.prototype.mark_spot_with_crosshair = function(pos) {
+      var c, _i, _len, _ref, _results;
+      this.crosshairs.push(JRule.Crosshair.create('x', "" + pos[0] + "px"));
+      this.crosshairs.push(JRule.Crosshair.create('y', "" + pos[1] + "px"));
+      _ref = this.crosshairs;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        c = _ref[_i];
+        _results.push(document.body.appendChild(c));
+      }
+      return _results;
+    };
+
     Caliper.prototype.cleanup = function() {
+      var c, _i, _len, _ref;
       this.indicator.removeChild(this.indicator_size);
-      return document.body.removeChild(this.indicator);
+      document.body.removeChild(this.indicator);
+      _ref = this.crosshairs;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        c = _ref[_i];
+        document.body.removeChild(c);
+      }
+      return this.crosshairs = [];
     };
 
     return Caliper;

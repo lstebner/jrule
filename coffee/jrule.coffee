@@ -28,6 +28,35 @@ class JRule
   toggle_rulers: ->
     @border_rulers.toggle_visibility()
 
+class JRule.Crosshair
+  @create: (axis, pos="50%", style={}) ->
+    style_defaults = 
+      crosshairColor: "rgba(100, 100, 100, .5)"
+      crosshairThickness: 1
+
+    for key, val of style_defaults
+      if !style.hasOwnProperty(key)
+        style[key] = val
+
+    crosshair = document.createElement "div"
+    crosshair.style.position = "fixed"
+    crosshair.style.backgroundColor = "#{style.crosshairColor}"
+    crosshair.style.zIndex = 4000
+    crosshair.className = "crosshair"
+
+    if axis == "x" || axis == "horizontal"
+      crosshair.style.width = "#{style.crosshairThickness}px"
+      crosshair.style.top = 0
+      crosshair.style.bottom = 0
+      crosshair.style.left = "#{pos}"
+    else
+      crosshair.style.height = "#{style.crosshairThickness}px"
+      crosshair.style.left = 0
+      crosshair.style.right = 0
+      crosshair.style.top = "#{pos}"
+
+    crosshair
+
 class JRule.MouseTracker
   @get_tracker: ->
     @tracker ||= new JRule.MouseTracker()
@@ -82,28 +111,8 @@ class JRule.MouseTracker
   setup_crosshairs: ->
     @crosshairs = {}
 
-    create = (axis) =>
-      crosshair = document.createElement "div"
-      crosshair.style.position = "fixed"
-      crosshair.style.backgroundColor = "#{@opts.style.crosshairColor}"
-      crosshair.style.zIndex = 4000
-      crosshair.className = "crosshair"
-
-      if axis == "x" || axis == "horizontal"
-        crosshair.style.width = "#{@opts.style.crosshairThickness}px"
-        crosshair.style.top = 0
-        crosshair.style.bottom = 0
-        crosshair.style.left = "50%"
-      else
-        crosshair.style.height = "#{@opts.style.crosshairThickness}px"
-        crosshair.style.left = 0
-        crosshair.style.right = 0
-        crosshair.style.top = "50%"
-
-      crosshair
-
-    @crosshairs.x = create 'x'
-    @crosshairs.y = create 'y'
+    @crosshairs.x = JRule.Crosshair.create 'x', "50%", @opts.style
+    @crosshairs.y = JRule.Crosshair.create 'y', "50%", @opts.style
 
     for coord, c of @crosshairs
       document.body.appendChild c
@@ -338,6 +347,7 @@ class JRule.BorderRulers
 class JRule.Caliper
   constructor: (@opts={}) ->
     @mouse_tracker = JRule.MouseTracker.get_tracker()
+    @crosshairs = []
     @setup_events()
 
   setup_events: ->
@@ -345,13 +355,12 @@ class JRule.Caliper
       if e.keyCode == 16 #shift
         @measuring = true
         @start_pos = [@mouse_tracker.mousex, @mouse_tracker.mousey]
+        @mark_spot_with_crosshair @start_pos
         @setup_indicators()
-        console.log 'start pos', @start_pos
 
         keyup_fn = =>
           @measuring = false
           @end_pos = [@mouse_tracker.mousex, @mouse_tracker.mousey]
-          console.log 'end pos', @end_pos
           document.removeEventListener 'keyup', keyup_fn
           @cleanup()
 
@@ -413,11 +422,21 @@ class JRule.Caliper
     @indicator_size = indicator_size
     @indicator.appendChild @indicator_size
 
+  mark_spot_with_crosshair: (pos) ->
+    @crosshairs.push JRule.Crosshair.create 'x', "#{pos[0]}px"
+    @crosshairs.push JRule.Crosshair.create 'y', "#{pos[1]}px"
 
+    for c in @crosshairs
+      document.body.appendChild c
 
   cleanup: ->
     @indicator.removeChild @indicator_size
     document.body.removeChild @indicator
+
+    for c in @crosshairs
+      document.body.removeChild c
+
+    @crosshairs = []
 
 
 
