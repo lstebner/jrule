@@ -2,23 +2,51 @@
 <html>
   <head>
     <title>JRule</title>
+    <style type="text/css">
+        body{
+            padding: 120px;
+            font-family: sans-serif;
+        }
+
+        a, a:visited{
+            text-decoration: none;
+            color: #4aa1d7;
+        }
+
+        a:hover{
+            text-decoration: underline;
+            color: #1c587d;
+        }
+    </style>
   </head>
   <body>
     <a href="javascript: (function () { 
     var jsCode = document.createElement('script'); 
     jsCode.setAttribute('src', 'http://www.beansandhops.com/javascripts/jrule.js');                  
   document.body.appendChild(jsCode); 
- }());">JRule</a>
+ }());">JRule Bookmarklet</a>
 
     <p>To use this bookmarklet, drag it to your bookmarks bar and then press it on any page you want to use JRule on. To remove it, just refresh the page! If the measuring function (holding shift) isn't working, be sure to click anywhere on the page once after pressing the bookmarklet and then continue use as normal.</p>
 
     <p>You can demo JRule's functionality by simply clicking on the link, this is how the bookmarklet will behave once added to your bookmarks bar.</p>
 
-    <em>Note that the bookmarklet is not currently playing nicely with https domains</em>
+    <em>Note that the bookmarklets do not play nicely with https domains</em>
 
-    <br />
-    
+    <br /><br />
+
     <a href="https://github.com/lstebner/jrule">View JRule on Github</a>
+
+    <hr>
+
+    <h3>Features</h3>
+
+    <ul>
+        <li>Vertical and Horizontal rulers with ticks every 100px. Toggle these with "r"</li>
+        <li>Mouse crosshairs for easily checking alignment. Toggle these with "c"</li>
+        <li>Adjustable crosshair thickness for checking paddings. Increase/Decrease in 1px increments with "+/-"</li>
+        <li>Measure tool. Hold "shift" and drag the mouse to check how big things are.</li>
+    </ul>
+
   </body>
 </html>
     
