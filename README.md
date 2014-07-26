@@ -28,10 +28,34 @@ JRule will be highly configurable at some point, but is still in very early deve
 
 ## Bookmarklet
 
+*note: The bookmarklet doesn't currently play well with https websites, but I will look into a fix for that in the near future*
+
 The only thing easier than needing to include this code into your project is the fact that you can just add a bookmarklet to your toolbar and use that instead! Visit the [Hosted Demo](http://www.beansandhops.com/jrule.html) and just drag that link to your bookmarks bar to be able to use JRule on any of your own pages, or anyone elses! Just click it and it will inject the needed code onto the page you're currently viewing. Refresh the page after (or destroy JRule via the console) and everything will go back to as it was before.
+
+## Using the Library Directly
+
+Alternatively to the Bookmarklet, you may decide to clone the source and instantiate it yourself so that you have more control. Doing this is easy also because there is only one file you need to include, `jrule.js`. Once you have this included, you're done! It handles creating the `document.jruler` object on its own and you can then access any of the JRule methods/properties from there.
 
 ## Feedback
 
 Was this helpful to you? Give me feedback and feature ideas! Thanks for checking out JRule! 
 
+## Plans
 
+These are the things that I've thought of to add, but feel free to file requests here on github if you think you have a good feature. 
+
+- A customizable grid overlay
+- Configurable keys for toggling Crosshairs and Measuring Tool
+- Expose other configuration options (colors, tick distance, divisions, etc)
+- Shortcut to toggle entire JRule UI
+- Fixed ratio for Measuring Tool
+- Fixed dimensions for Measuring Tool
+- Snapping for measuring tool
+- Factor in body offset for measuring elements taller than a page or getting the true offset of an item
+- Additional Rulers on the right/bottom 
+- Toggles for all rulers 
+- Customizable crosshair thickness for easily checking padding/margins
+
+## Bugs
+
+Please file any bugs you find via Github! Also, please look to make sure someone else hasn't already filed the bug that you're going to file so there aren't duplicates. Thanks!
