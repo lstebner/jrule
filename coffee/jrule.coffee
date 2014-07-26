@@ -3,9 +3,18 @@ class JRule
     @setup_border_rulers()
     @setup_caliper()
     @mouse_tracker = JRule.MouseTracker.get_tracker()
+    @setup_events()
+
     console?.log 'jrule ready!'
 
   default_opts: ->
+
+  setup_events: ->
+    document.addEventListener 'keydown', (e) =>
+      if e.keyCode == 67 #c
+        @toggle_crosshairs()
+      else if e.keyCode == 82 #r
+        @toggle_rulers()
 
   setup_border_rulers: ->
     @border_rulers = new JRule.BorderRulers()
@@ -15,6 +24,9 @@ class JRule
 
   toggle_crosshairs: ->
     @mouse_tracker.toggle_crosshairs()
+
+  toggle_rulers: ->
+    @border_rulers.toggle_visibility()
 
 class JRule.MouseTracker
   @get_tracker: ->
@@ -165,6 +177,7 @@ class JRule.BorderRulers
 
     @setup_ticks()
 
+    @shown = true
     @setup = true
     @
 
@@ -263,6 +276,12 @@ class JRule.BorderRulers
         @mouse_ticks.y.style.top = "#{@mouse_tracker.mousey}px"
 
       @mouse_pos.innerText = "#{@mouse_tracker.mousex}, #{@mouse_tracker.mousey}"
+
+  toggle_visibility: ->
+    @shown = !@shown
+
+    for side, ruler of @rulers
+      ruler.style.display = if @shown then "block" else "none"
 
 
 

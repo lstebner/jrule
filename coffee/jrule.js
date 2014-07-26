@@ -8,12 +8,25 @@
       this.setup_border_rulers();
       this.setup_caliper();
       this.mouse_tracker = JRule.MouseTracker.get_tracker();
+      this.setup_events();
       if (typeof console !== "undefined" && console !== null) {
         console.log('jrule ready!');
       }
     }
 
     JRule.prototype.default_opts = function() {};
+
+    JRule.prototype.setup_events = function() {
+      return document.addEventListener('keydown', (function(_this) {
+        return function(e) {
+          if (e.keyCode === 67) {
+            return _this.toggle_crosshairs();
+          } else if (e.keyCode === 82) {
+            return _this.toggle_rulers();
+          }
+        };
+      })(this));
+    };
 
     JRule.prototype.setup_border_rulers = function() {
       return this.border_rulers = new JRule.BorderRulers();
@@ -25,6 +38,10 @@
 
     JRule.prototype.toggle_crosshairs = function() {
       return this.mouse_tracker.toggle_crosshairs();
+    };
+
+    JRule.prototype.toggle_rulers = function() {
+      return this.border_rulers.toggle_visibility();
     };
 
     return JRule;
@@ -227,6 +244,7 @@
         }
       }
       this.setup_ticks();
+      this.shown = true;
       this.setup = true;
       return this;
     };
@@ -352,6 +370,18 @@
         }
         return this.mouse_pos.innerText = "" + this.mouse_tracker.mousex + ", " + this.mouse_tracker.mousey;
       }
+    };
+
+    BorderRulers.prototype.toggle_visibility = function() {
+      var ruler, side, _ref, _results;
+      this.shown = !this.shown;
+      _ref = this.rulers;
+      _results = [];
+      for (side in _ref) {
+        ruler = _ref[side];
+        _results.push(ruler.style.display = this.shown ? "block" : "none");
+      }
+      return _results;
     };
 
     return BorderRulers;
