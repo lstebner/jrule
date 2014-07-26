@@ -66,7 +66,11 @@
     MouseTracker.prototype.default_opts = function() {
       var defaults, key, val;
       defaults = {
-        show_crosshairs: true
+        show_crosshairs: true,
+        style: {
+          crosshairColor: "rgba(100, 100, 100, .6)",
+          crosshairThickness: 1
+        }
       };
       for (key in defaults) {
         val = defaults[key];
@@ -78,7 +82,7 @@
     };
 
     MouseTracker.prototype.setup_events = function() {
-      return document.addEventListener('mousemove', (function(_this) {
+      document.addEventListener('mousemove', (function(_this) {
         return function(e) {
           var event;
           _this.mousex = e.clientX;
@@ -90,31 +94,60 @@
           }
         };
       })(this));
+      return document.addEventListener('keydown', (function(_this) {
+        return function(e) {
+          if (e.keyCode === 187) {
+            return _this.increase_crosshair_size();
+          } else if (e.keyCode === 189) {
+            return _this.decrease_crosshair_size();
+          }
+        };
+      })(this));
+    };
+
+    MouseTracker.prototype.increase_crosshair_size = function() {
+      var _ref, _ref1;
+      this.opts.style.crosshairThickness += 1;
+      if ((_ref = this.crosshairs.x) != null) {
+        _ref.style.width = "" + this.opts.style.crosshairThickness + "px";
+      }
+      return (_ref1 = this.crosshairs.y) != null ? _ref1.style.height = "" + this.opts.style.crosshairThickness + "px" : void 0;
+    };
+
+    MouseTracker.prototype.decrease_crosshair_size = function() {
+      var _ref, _ref1;
+      this.opts.style.crosshairThickness = Math.max(1, this.opts.style.crosshairThickness - 1);
+      if ((_ref = this.crosshairs.x) != null) {
+        _ref.style.width = "" + this.opts.style.crosshairThickness + "px";
+      }
+      return (_ref1 = this.crosshairs.y) != null ? _ref1.style.height = "" + this.opts.style.crosshairThickness + "px" : void 0;
     };
 
     MouseTracker.prototype.setup_crosshairs = function() {
       var c, coord, create, _ref, _results;
       this.crosshairs = {};
-      create = function(axis) {
-        var crosshair;
-        crosshair = document.createElement("div");
-        crosshair.style.position = "fixed";
-        crosshair.style.backgroundColor = "#333";
-        crosshair.style.zIndex = 4000;
-        crosshair.className = "crosshair";
-        if (axis === "x" || axis === "horizontal") {
-          crosshair.style.width = "1px";
-          crosshair.style.top = 0;
-          crosshair.style.bottom = 0;
-          crosshair.style.left = "50%";
-        } else {
-          crosshair.style.height = "1px";
-          crosshair.style.left = 0;
-          crosshair.style.right = 0;
-          crosshair.style.top = "50%";
-        }
-        return crosshair;
-      };
+      create = (function(_this) {
+        return function(axis) {
+          var crosshair;
+          crosshair = document.createElement("div");
+          crosshair.style.position = "fixed";
+          crosshair.style.backgroundColor = "" + _this.opts.style.crosshairColor;
+          crosshair.style.zIndex = 4000;
+          crosshair.className = "crosshair";
+          if (axis === "x" || axis === "horizontal") {
+            crosshair.style.width = "" + _this.opts.style.crosshairThickness + "px";
+            crosshair.style.top = 0;
+            crosshair.style.bottom = 0;
+            crosshair.style.left = "50%";
+          } else {
+            crosshair.style.height = "" + _this.opts.style.crosshairThickness + "px";
+            crosshair.style.left = 0;
+            crosshair.style.right = 0;
+            crosshair.style.top = "50%";
+          }
+          return crosshair;
+        };
+      })(this);
       this.crosshairs.x = create('x');
       this.crosshairs.y = create('y');
       _ref = this.crosshairs;
@@ -127,11 +160,13 @@
     };
 
     MouseTracker.prototype.render_crosshairs = function() {
+      var offset;
       if (!this.crosshairs) {
         this.setup_crosshairs();
       }
-      this.crosshairs.x.style.left = "" + this.mousex + "px";
-      return this.crosshairs.y.style.top = "" + this.mousey + "px";
+      offset = this.opts.style.crosshairThickness === 1 ? 0 : Math.round(this.opts.style.crosshairThickness / 2);
+      this.crosshairs.x.style.left = "" + (this.mousex - offset) + "px";
+      return this.crosshairs.y.style.top = "" + (this.mousey - offset) + "px";
     };
 
     MouseTracker.prototype.toggle_crosshairs = function() {

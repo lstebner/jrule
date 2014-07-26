@@ -43,6 +43,9 @@ class JRule.MouseTracker
   default_opts: ->
     defaults = 
       show_crosshairs: true
+      style:
+        crosshairColor: "rgba(100, 100, 100, .6)"
+        crosshairThickness: 1
 
     #todo: use extend
     for key, val of defaults
@@ -60,23 +63,39 @@ class JRule.MouseTracker
 
       @render_crosshairs() if @opts.show_crosshairs
 
+    document.addEventListener 'keydown', (e) =>
+      if e.keyCode == 187 #+
+        @increase_crosshair_size()
+      else if e.keyCode == 189 #-
+        @decrease_crosshair_size()
+
+  increase_crosshair_size: ->
+    @opts.style.crosshairThickness += 1
+    @crosshairs.x?.style.width = "#{@opts.style.crosshairThickness}px"
+    @crosshairs.y?.style.height = "#{@opts.style.crosshairThickness}px"
+
+  decrease_crosshair_size: ->
+    @opts.style.crosshairThickness = Math.max 1, @opts.style.crosshairThickness - 1
+    @crosshairs.x?.style.width = "#{@opts.style.crosshairThickness}px"
+    @crosshairs.y?.style.height = "#{@opts.style.crosshairThickness}px"
+
   setup_crosshairs: ->
     @crosshairs = {}
 
-    create = (axis) ->
+    create = (axis) =>
       crosshair = document.createElement "div"
       crosshair.style.position = "fixed"
-      crosshair.style.backgroundColor = "#333"
+      crosshair.style.backgroundColor = "#{@opts.style.crosshairColor}"
       crosshair.style.zIndex = 4000
       crosshair.className = "crosshair"
 
       if axis == "x" || axis == "horizontal"
-        crosshair.style.width = "1px"
+        crosshair.style.width = "#{@opts.style.crosshairThickness}px"
         crosshair.style.top = 0
         crosshair.style.bottom = 0
         crosshair.style.left = "50%"
       else
-        crosshair.style.height = "1px"
+        crosshair.style.height = "#{@opts.style.crosshairThickness}px"
         crosshair.style.left = 0
         crosshair.style.right = 0
         crosshair.style.top = "50%"
@@ -91,8 +110,9 @@ class JRule.MouseTracker
 
   render_crosshairs: ->
     @setup_crosshairs() if !@crosshairs
-    @crosshairs.x.style.left = "#{@mousex}px"
-    @crosshairs.y.style.top = "#{@mousey}px"
+    offset = if @opts.style.crosshairThickness == 1 then 0 else Math.round(@opts.style.crosshairThickness / 2)
+    @crosshairs.x.style.left = "#{@mousex - offset}px"
+    @crosshairs.y.style.top = "#{@mousey - offset}px"
 
   toggle_crosshairs: ->
     @opts.show_crosshairs = !@opts.show_crosshairs
