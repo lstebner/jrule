@@ -54,7 +54,6 @@ Was this helpful to you? Give me feedback and feature ideas! Thanks for checking
 These are the things that I've thought of to add, but feel free to file requests here on github if you think you have a good feature. 
 
 - A customizable grid overlay
-- Configurable keys for toggling Crosshairs and Measuring Tool
 - Expose other configuration options (colors, tick distance, divisions, etc)
 - Shortcut to toggle entire JRule UI
 - Fixed ratio for Measuring Tool
@@ -62,7 +61,6 @@ These are the things that I've thought of to add, but feel free to file requests
 - Snapping for measuring tool
 - Factor in body offset for measuring elements taller than a page or getting the true offset of an item
 - Additional Rulers on the right/bottom 
-- Toggles for all rulers 
 - Customizable crosshair thickness for easily checking padding/margins
 
 ## Bugs
