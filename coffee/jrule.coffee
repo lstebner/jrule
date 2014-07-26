@@ -2,6 +2,7 @@ class JRule
   constructor: (@opts={}) ->
     @setup_border_rulers()
     @setup_caliper()
+    @setup_grid()
     @mouse_tracker = JRule.MouseTracker.get_tracker()
     @setup_events()
 
@@ -15,6 +16,8 @@ class JRule
         @toggle_crosshairs()
       else if e.keyCode == 82 #r
         @toggle_rulers()
+      else if e.keyCode == 71 #g
+        @toggle_grid()
 
   setup_border_rulers: ->
     @border_rulers = new JRule.BorderRulers()
@@ -22,11 +25,17 @@ class JRule
   setup_caliper: ->
     @caliper = new JRule.Caliper()
 
+  setup_grid: ->
+    @grid = new JRule.Grid()
+
   toggle_crosshairs: ->
     @mouse_tracker.toggle_crosshairs()
 
   toggle_rulers: ->
     @border_rulers.toggle_visibility()
+
+  toggle_grid: ->
+    @grid.toggle_grid()
 
 class JRule.Crosshair
   @create: (axis, pos="50%", style={}) ->
@@ -441,12 +450,65 @@ class JRule.Caliper
 
     document.body.style.cursor = "default"
 
+class JRule.Grid
+  constructor: (@opts={}) ->
+    @default_opts()
+    @setup_grid()
 
+  default_opts: ->
+    defaults = 
+      tick_distance: 100 #px
+      divisions: 0
+      show: false
+      style:
+        tickLineColor: "rgba(40, 168, 207, 1)"
+        divisionLineColor: "rgba(200, 200, 200, .5)"
 
+    for key, val of defaults
+      if !@opts.hasOwnProperty key
+        @opts[key] = val
 
+    @opts
 
+  setup_grid: ->
+    doc_rect = document.body.getBoundingClientRect()
+    num_ticks = Math.ceil doc_rect.width / @opts.tick_distance
+    @ticks = []
 
+    for i in [1...num_ticks]
+      offset = i * @opts.tick_distance
+      @ticks.push JRule.Crosshair.create 'x', "#{offset}px", { backgroundColor: @opts.style.tickLineColor }
+      @ticks.push JRule.Crosshair.create 'y', "#{offset}px", { backgroundColor: @opts.style.tickLineColor }
 
+    for t in @ticks
+      document.body.appendChild t
+
+    if @opts.show
+      @show_ticks()
+    else
+      @hide_ticks()
+
+  cleanup: ->
+    for t in @ticks
+      document.body.removeChild t
+
+  hide_ticks: ->
+    @shown = false
+    for t in @ticks
+      t.style.display = "none"
+
+  show_ticks: ->
+    @shown = true
+    for t in @ticks
+      t.style.display = "block"
+
+  toggle_grid: ->
+    @shown = !@shown
+
+    if @shown
+      @show_ticks()
+    else
+      @hide_ticks()
 
 document.JRule = JRule
 

@@ -7,6 +7,7 @@
       this.opts = opts != null ? opts : {};
       this.setup_border_rulers();
       this.setup_caliper();
+      this.setup_grid();
       this.mouse_tracker = JRule.MouseTracker.get_tracker();
       this.setup_events();
       if (typeof console !== "undefined" && console !== null) {
@@ -23,6 +24,8 @@
             return _this.toggle_crosshairs();
           } else if (e.keyCode === 82) {
             return _this.toggle_rulers();
+          } else if (e.keyCode === 71) {
+            return _this.toggle_grid();
           }
         };
       })(this));
@@ -36,12 +39,20 @@
       return this.caliper = new JRule.Caliper();
     };
 
+    JRule.prototype.setup_grid = function() {
+      return this.grid = new JRule.Grid();
+    };
+
     JRule.prototype.toggle_crosshairs = function() {
       return this.mouse_tracker.toggle_crosshairs();
     };
 
     JRule.prototype.toggle_rulers = function() {
       return this.border_rulers.toggle_visibility();
+    };
+
+    JRule.prototype.toggle_grid = function() {
+      return this.grid.toggle_grid();
     };
 
     return JRule;
@@ -601,6 +612,107 @@
     };
 
     return Caliper;
+
+  })();
+
+  JRule.Grid = (function() {
+    function Grid(opts) {
+      this.opts = opts != null ? opts : {};
+      this.default_opts();
+      this.setup_grid();
+    }
+
+    Grid.prototype.default_opts = function() {
+      var defaults, key, val;
+      defaults = {
+        tick_distance: 100,
+        divisions: 0,
+        show: false,
+        style: {
+          tickLineColor: "rgba(40, 168, 207, 1)",
+          divisionLineColor: "rgba(200, 200, 200, .5)"
+        }
+      };
+      for (key in defaults) {
+        val = defaults[key];
+        if (!this.opts.hasOwnProperty(key)) {
+          this.opts[key] = val;
+        }
+      }
+      return this.opts;
+    };
+
+    Grid.prototype.setup_grid = function() {
+      var doc_rect, i, num_ticks, offset, t, _i, _j, _len, _ref;
+      doc_rect = document.body.getBoundingClientRect();
+      num_ticks = Math.ceil(doc_rect.width / this.opts.tick_distance);
+      this.ticks = [];
+      for (i = _i = 1; 1 <= num_ticks ? _i < num_ticks : _i > num_ticks; i = 1 <= num_ticks ? ++_i : --_i) {
+        offset = i * this.opts.tick_distance;
+        this.ticks.push(JRule.Crosshair.create('x', "" + offset + "px", {
+          backgroundColor: this.opts.style.tickLineColor
+        }));
+        this.ticks.push(JRule.Crosshair.create('y', "" + offset + "px", {
+          backgroundColor: this.opts.style.tickLineColor
+        }));
+      }
+      _ref = this.ticks;
+      for (_j = 0, _len = _ref.length; _j < _len; _j++) {
+        t = _ref[_j];
+        document.body.appendChild(t);
+      }
+      if (this.opts.show) {
+        return this.show_ticks();
+      } else {
+        return this.hide_ticks();
+      }
+    };
+
+    Grid.prototype.cleanup = function() {
+      var t, _i, _len, _ref, _results;
+      _ref = this.ticks;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        t = _ref[_i];
+        _results.push(document.body.removeChild(t));
+      }
+      return _results;
+    };
+
+    Grid.prototype.hide_ticks = function() {
+      var t, _i, _len, _ref, _results;
+      this.shown = false;
+      _ref = this.ticks;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        t = _ref[_i];
+        _results.push(t.style.display = "none");
+      }
+      return _results;
+    };
+
+    Grid.prototype.show_ticks = function() {
+      var t, _i, _len, _ref, _results;
+      this.shown = true;
+      _ref = this.ticks;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        t = _ref[_i];
+        _results.push(t.style.display = "block");
+      }
+      return _results;
+    };
+
+    Grid.prototype.toggle_grid = function() {
+      this.shown = !this.shown;
+      if (this.shown) {
+        return this.show_ticks();
+      } else {
+        return this.hide_ticks();
+      }
+    };
+
+    return Grid;
 
   })();
 
