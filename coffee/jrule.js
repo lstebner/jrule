@@ -628,12 +628,12 @@
       var defaults, key, key2, val, val2, _ref;
       defaults = {
         tick_distance: 100,
-        divisions: 0,
+        divisions: 3,
         show: false,
         start_in_center: true,
         style: {
           tickLineColor: "rgba(191, 231, 243, .6)",
-          divisionLineColor: "rgba(200, 200, 200, .5)",
+          divisionLineColor: "rgba(220, 220, 220, .3)",
           centerLineColor: "rgba(255, 0, 0, .3)"
         }
       };
@@ -677,10 +677,11 @@
     };
 
     Grid.prototype.setup_grid = function() {
-      var center_x, center_y, i, num_ticks, offset, t, x_offset, y_offset, _i, _j, _len, _ref;
+      var center_x, center_y, division_distance, i, n, num_ticks, offset, t, x_offset, y_offset, _i, _j, _k, _l, _len, _m, _ref, _ref1, _ref2, _ref3;
       center_x = Math.round(document.documentElement.clientWidth / 2);
       center_y = Math.round(document.documentElement.clientHeight / 2);
       num_ticks = Math.ceil(document.documentElement.clientWidth / this.opts.tick_distance);
+      division_distance = this.opts.divisions > 0 ? Math.round(this.opts.tick_distance / this.opts.divisions) : 0;
       this.ticks = [];
       if (this.opts.start_in_center) {
         num_ticks = num_ticks / 2;
@@ -690,8 +691,24 @@
         this.ticks.push(JRule.Crosshair.create('y', "" + center_y + "px", {
           crosshairColor: this.opts.style.centerLineColor
         }));
+        if (this.opts.divisions > 0) {
+          for (n = _i = 1, _ref = this.opts.divisions; 1 <= _ref ? _i < _ref : _i > _ref; n = 1 <= _ref ? ++_i : --_i) {
+            this.ticks.push(JRule.Crosshair.create('x', "" + (center_x + n * division_distance) + "px", {
+              crosshairColor: this.opts.style.divisionLineColor
+            }));
+            this.ticks.push(JRule.Crosshair.create('y', "" + (center_y + n * division_distance) + "px", {
+              crosshairColor: this.opts.style.divisionLineColor
+            }));
+            this.ticks.push(JRule.Crosshair.create('x', "" + (center_x - n * division_distance) + "px", {
+              crosshairColor: this.opts.style.divisionLineColor
+            }));
+            this.ticks.push(JRule.Crosshair.create('y', "" + (center_y - n * division_distance) + "px", {
+              crosshairColor: this.opts.style.divisionLineColor
+            }));
+          }
+        }
       }
-      for (i = _i = 1; 1 <= num_ticks ? _i < num_ticks : _i > num_ticks; i = 1 <= num_ticks ? ++_i : --_i) {
+      for (i = _j = 1; 1 <= num_ticks ? _j < num_ticks : _j > num_ticks; i = 1 <= num_ticks ? ++_j : --_j) {
         offset = i * this.opts.tick_distance;
         x_offset = this.opts.start_in_center ? center_x + offset : offset;
         y_offset = this.opts.start_in_center ? center_y + offset : offset;
@@ -701,6 +718,16 @@
         this.ticks.push(JRule.Crosshair.create('y', "" + y_offset + "px", {
           crosshairColor: this.opts.style.tickLineColor
         }));
+        if (this.opts.divisions > 0) {
+          for (n = _k = 1, _ref1 = this.opts.divisions; 1 <= _ref1 ? _k < _ref1 : _k > _ref1; n = 1 <= _ref1 ? ++_k : --_k) {
+            this.ticks.push(JRule.Crosshair.create('x', "" + (x_offset + n * division_distance) + "px", {
+              crosshairColor: this.opts.style.divisionLineColor
+            }));
+            this.ticks.push(JRule.Crosshair.create('y', "" + (y_offset + n * division_distance) + "px", {
+              crosshairColor: this.opts.style.divisionLineColor
+            }));
+          }
+        }
         if (this.opts.start_in_center) {
           this.ticks.push(JRule.Crosshair.create('x', "" + (center_x - offset) + "px", {
             crosshairColor: this.opts.style.tickLineColor
@@ -708,11 +735,21 @@
           this.ticks.push(JRule.Crosshair.create('y', "" + (center_y - offset) + "px", {
             crosshairColor: this.opts.style.tickLineColor
           }));
+          if (this.opts.divisions > 0) {
+            for (n = _l = 1, _ref2 = this.opts.divisions; 1 <= _ref2 ? _l < _ref2 : _l > _ref2; n = 1 <= _ref2 ? ++_l : --_l) {
+              this.ticks.push(JRule.Crosshair.create('x', "" + (center_x - offset - n * division_distance) + "px", {
+                crosshairColor: this.opts.style.divisionLineColor
+              }));
+              this.ticks.push(JRule.Crosshair.create('y', "" + (center_y - offset - n * division_distance) + "px", {
+                crosshairColor: this.opts.style.divisionLineColor
+              }));
+            }
+          }
         }
       }
-      _ref = this.ticks;
-      for (_j = 0, _len = _ref.length; _j < _len; _j++) {
-        t = _ref[_j];
+      _ref3 = this.ticks;
+      for (_m = 0, _len = _ref3.length; _m < _len; _m++) {
+        t = _ref3[_m];
         document.body.appendChild(t);
       }
       if (this.opts.show) {

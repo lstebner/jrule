@@ -460,12 +460,12 @@ class JRule.Grid
   default_opts: ->
     defaults = 
       tick_distance: 100 #px
-      divisions: 0
+      divisions: 3
       show: false
       start_in_center: true #if true, 0,0 is center of screen. default is top, left
       style:
         tickLineColor: "rgba(191, 231, 243, .6)"
-        divisionLineColor: "rgba(200, 200, 200, .5)"
+        divisionLineColor: "rgba(220, 220, 220, .3)"
         centerLineColor: "rgba(255, 0, 0, .3)"
 
     for key, val of defaults
@@ -500,12 +500,20 @@ class JRule.Grid
     center_x = Math.round document.documentElement.clientWidth / 2
     center_y = Math.round document.documentElement.clientHeight / 2
     num_ticks = Math.ceil document.documentElement.clientWidth / @opts.tick_distance
+    division_distance = if @opts.divisions > 0 then Math.round(@opts.tick_distance / @opts.divisions) else 0
     @ticks = []
 
     if @opts.start_in_center
       num_ticks = num_ticks / 2
       @ticks.push JRule.Crosshair.create 'x', "#{center_x}px", { crosshairColor: @opts.style.centerLineColor }
       @ticks.push JRule.Crosshair.create 'y', "#{center_y}px", { crosshairColor: @opts.style.centerLineColor }      
+
+      if @opts.divisions > 0
+        for n in [1...@opts.divisions]
+          @ticks.push JRule.Crosshair.create 'x', "#{center_x + n * division_distance}px", { crosshairColor: @opts.style.divisionLineColor }
+          @ticks.push JRule.Crosshair.create 'y', "#{center_y + n * division_distance}px", { crosshairColor: @opts.style.divisionLineColor }
+          @ticks.push JRule.Crosshair.create 'x', "#{center_x - n * division_distance}px", { crosshairColor: @opts.style.divisionLineColor }
+          @ticks.push JRule.Crosshair.create 'y', "#{center_y - n * division_distance}px", { crosshairColor: @opts.style.divisionLineColor }
 
     for i in [1...num_ticks]
       offset = i * @opts.tick_distance
@@ -522,9 +530,19 @@ class JRule.Grid
       @ticks.push JRule.Crosshair.create 'x', "#{x_offset}px", { crosshairColor: @opts.style.tickLineColor }
       @ticks.push JRule.Crosshair.create 'y', "#{y_offset}px", { crosshairColor: @opts.style.tickLineColor }
 
+      if @opts.divisions > 0
+        for n in [1...@opts.divisions]
+          @ticks.push JRule.Crosshair.create 'x', "#{x_offset + n * division_distance}px", { crosshairColor: @opts.style.divisionLineColor }
+          @ticks.push JRule.Crosshair.create 'y', "#{y_offset + n * division_distance}px", { crosshairColor: @opts.style.divisionLineColor }
+
       if @opts.start_in_center
         @ticks.push JRule.Crosshair.create 'x', "#{center_x - offset}px", { crosshairColor: @opts.style.tickLineColor }
         @ticks.push JRule.Crosshair.create 'y', "#{center_y - offset}px", { crosshairColor: @opts.style.tickLineColor }        
+
+        if @opts.divisions > 0
+          for n in [1...@opts.divisions]
+            @ticks.push JRule.Crosshair.create 'x', "#{center_x - offset - n * division_distance}px", { crosshairColor: @opts.style.divisionLineColor }
+            @ticks.push JRule.Crosshair.create 'y', "#{center_y - offset - n * division_distance}px", { crosshairColor: @opts.style.divisionLineColor }
 
     for t in @ticks
       document.body.appendChild t
