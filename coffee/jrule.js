@@ -251,7 +251,8 @@
         rule_size: 25,
         divisions: 8,
         show_mouse: true,
-        show_labels: true
+        show_labels: true,
+        start_in_center: true
       };
       return this.opts = defaults;
     };
@@ -620,41 +621,94 @@
       this.opts = opts != null ? opts : {};
       this.default_opts();
       this.setup_grid();
+      this.setup_events();
     }
 
     Grid.prototype.default_opts = function() {
-      var defaults, key, val;
+      var defaults, key, key2, val, val2, _ref;
       defaults = {
         tick_distance: 100,
         divisions: 0,
         show: false,
+        start_in_center: true,
         style: {
-          tickLineColor: "rgba(40, 168, 207, 1)",
-          divisionLineColor: "rgba(200, 200, 200, .5)"
+          tickLineColor: "rgba(191, 231, 243, .6)",
+          divisionLineColor: "rgba(200, 200, 200, .5)",
+          centerLineColor: "rgba(255, 0, 0, .3)"
         }
       };
       for (key in defaults) {
         val = defaults[key];
         if (!this.opts.hasOwnProperty(key)) {
           this.opts[key] = val;
+        } else if (typeof this.opts[key] === "object") {
+          _ref = this.opts[key];
+          for (key2 in _ref) {
+            val2 = _ref[key2];
+            if (!this.opts[key].hasOwnProperty(key2)) {
+              this.opts[key][key] = val2;
+            }
+          }
         }
       }
       return this.opts;
     };
 
+    Grid.prototype.setup_events = function() {
+      this.window_resizing = false;
+      this.resize_to = null;
+      return window.addEventListener('resize', (function(_this) {
+        return function(e) {
+          if (_this.window_resizing) {
+            if (_this.resize_to) {
+              clearTimeout(_this.resize_to);
+            }
+            return _this.resize_to = setTimeout(function() {
+              _this.window_resizing = false;
+              _this.setup_grid();
+              return _this.show_ticks();
+            }, 400);
+          } else {
+            _this.window_resizing = true;
+            return _this.cleanup();
+          }
+        };
+      })(this));
+    };
+
     Grid.prototype.setup_grid = function() {
-      var doc_rect, i, num_ticks, offset, t, _i, _j, _len, _ref;
-      doc_rect = document.body.getBoundingClientRect();
-      num_ticks = Math.ceil(doc_rect.width / this.opts.tick_distance);
+      var center_x, center_y, i, num_ticks, offset, t, x_offset, y_offset, _i, _j, _len, _ref;
+      center_x = Math.round(document.documentElement.clientWidth / 2);
+      center_y = Math.round(document.documentElement.clientHeight / 2);
+      num_ticks = Math.ceil(document.documentElement.clientWidth / this.opts.tick_distance);
       this.ticks = [];
+      if (this.opts.start_in_center) {
+        num_ticks = num_ticks / 2;
+        this.ticks.push(JRule.Crosshair.create('x', "" + center_x + "px", {
+          crosshairColor: this.opts.style.centerLineColor
+        }));
+        this.ticks.push(JRule.Crosshair.create('y', "" + center_y + "px", {
+          crosshairColor: this.opts.style.centerLineColor
+        }));
+      }
       for (i = _i = 1; 1 <= num_ticks ? _i < num_ticks : _i > num_ticks; i = 1 <= num_ticks ? ++_i : --_i) {
         offset = i * this.opts.tick_distance;
-        this.ticks.push(JRule.Crosshair.create('x', "" + offset + "px", {
-          backgroundColor: this.opts.style.tickLineColor
+        x_offset = this.opts.start_in_center ? center_x + offset : offset;
+        y_offset = this.opts.start_in_center ? center_y + offset : offset;
+        this.ticks.push(JRule.Crosshair.create('x', "" + x_offset + "px", {
+          crosshairColor: this.opts.style.tickLineColor
         }));
-        this.ticks.push(JRule.Crosshair.create('y', "" + offset + "px", {
-          backgroundColor: this.opts.style.tickLineColor
+        this.ticks.push(JRule.Crosshair.create('y', "" + y_offset + "px", {
+          crosshairColor: this.opts.style.tickLineColor
         }));
+        if (this.opts.start_in_center) {
+          this.ticks.push(JRule.Crosshair.create('x', "" + (center_x - offset) + "px", {
+            crosshairColor: this.opts.style.tickLineColor
+          }));
+          this.ticks.push(JRule.Crosshair.create('y', "" + (center_y - offset) + "px", {
+            crosshairColor: this.opts.style.tickLineColor
+          }));
+        }
       }
       _ref = this.ticks;
       for (_j = 0, _len = _ref.length; _j < _len; _j++) {

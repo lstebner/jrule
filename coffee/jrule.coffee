@@ -170,6 +170,7 @@ class JRule.BorderRulers
       divisions: 8
       show_mouse: true
       show_labels: true
+      start_in_center: true
 
     #todo: actual extend of defaults with given @opts
     @opts = defaults
@@ -454,31 +455,76 @@ class JRule.Grid
   constructor: (@opts={}) ->
     @default_opts()
     @setup_grid()
+    @setup_events()
 
   default_opts: ->
     defaults = 
       tick_distance: 100 #px
       divisions: 0
       show: false
+      start_in_center: true #if true, 0,0 is center of screen. default is top, left
       style:
-        tickLineColor: "rgba(40, 168, 207, 1)"
+        tickLineColor: "rgba(191, 231, 243, .6)"
         divisionLineColor: "rgba(200, 200, 200, .5)"
+        centerLineColor: "rgba(255, 0, 0, .3)"
 
     for key, val of defaults
       if !@opts.hasOwnProperty key
         @opts[key] = val
+      #one level deep for now, should make recursive. 
+      else if typeof @opts[key] == "object"
+        for key2, val2 of @opts[key]
+          if !@opts[key].hasOwnProperty key2
+            @opts[key][key] = val2
 
     @opts
 
+  setup_events: ->
+    @window_resizing = false
+    @resize_to = null
+
+    window.addEventListener 'resize', (e) =>
+      if @window_resizing
+        clearTimeout(@resize_to) if @resize_to
+        @resize_to = setTimeout =>
+          @window_resizing = false
+          @setup_grid()
+          @show_ticks()
+        , 400
+      else
+        @window_resizing = true
+        @cleanup()
+
+
   setup_grid: ->
-    doc_rect = document.body.getBoundingClientRect()
-    num_ticks = Math.ceil doc_rect.width / @opts.tick_distance
+    center_x = Math.round document.documentElement.clientWidth / 2
+    center_y = Math.round document.documentElement.clientHeight / 2
+    num_ticks = Math.ceil document.documentElement.clientWidth / @opts.tick_distance
     @ticks = []
+
+    if @opts.start_in_center
+      num_ticks = num_ticks / 2
+      @ticks.push JRule.Crosshair.create 'x', "#{center_x}px", { crosshairColor: @opts.style.centerLineColor }
+      @ticks.push JRule.Crosshair.create 'y', "#{center_y}px", { crosshairColor: @opts.style.centerLineColor }      
 
     for i in [1...num_ticks]
       offset = i * @opts.tick_distance
-      @ticks.push JRule.Crosshair.create 'x', "#{offset}px", { backgroundColor: @opts.style.tickLineColor }
-      @ticks.push JRule.Crosshair.create 'y', "#{offset}px", { backgroundColor: @opts.style.tickLineColor }
+      x_offset = if @opts.start_in_center
+        center_x + offset
+      else
+        offset
+
+      y_offset = if @opts.start_in_center
+        center_y + offset
+      else
+        offset
+
+      @ticks.push JRule.Crosshair.create 'x', "#{x_offset}px", { crosshairColor: @opts.style.tickLineColor }
+      @ticks.push JRule.Crosshair.create 'y', "#{y_offset}px", { crosshairColor: @opts.style.tickLineColor }
+
+      if @opts.start_in_center
+        @ticks.push JRule.Crosshair.create 'x', "#{center_x - offset}px", { crosshairColor: @opts.style.tickLineColor }
+        @ticks.push JRule.Crosshair.create 'y', "#{center_y - offset}px", { crosshairColor: @opts.style.tickLineColor }        
 
     for t in @ticks
       document.body.appendChild t
