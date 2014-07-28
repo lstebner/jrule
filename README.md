@@ -28,7 +28,8 @@ If you want to toggle the crosshairs, simply pop open the console and type `docu
 
 - "r" - toggle visibility of rulers
 - "c" - toggle visibility of crosshairs
-- "+/-" - increase/decrease the size of the crosshairs
+- "g" - toggle visibility of grid
+- "+/-" - increase/decrease the thickness of the crosshairs (good for measuring padding/margins)
 - "shift" - hold to measure while moving the mouse
 
 ## Config
