@@ -1,3 +1,9 @@
+set_text = (el, content) ->
+  if el.innerText
+    el.innerText = content
+  else
+    el.textContent = content
+
 class JRule
   constructor: (@opts={}) ->
     @setup_border_rulers()
@@ -128,7 +134,7 @@ class JRule.MouseTracker
 
   render_crosshairs: ->
     @setup_crosshairs() if !@crosshairs
-    offset = if @opts.style.crosshairThickness == 1 then 0 else Math.round(@opts.style.crosshairThickness / 2)
+    offset = if @opts.style.crosshairThickness == 1 then 0 else Math.round(@opts.style.crosshairThickness / 2)  
     @crosshairs.x.style.left = "#{@mousex - offset}px"
     @crosshairs.y.style.top = "#{@mousey - offset}px"
 
@@ -244,7 +250,7 @@ class JRule.BorderRulers
   create_label: (side, pos) ->
     label = document.createElement "div"
     label.className = "tick_label"
-    label.innerText = "#{pos}px"
+    set_text label, "#{pos}px"
     label.style.position = "absolute"
     label.style.fontSize = "10px"
     label.style.fontFamily = "sans-serif"
@@ -344,7 +350,7 @@ class JRule.BorderRulers
       if @mouse_ticks.y
         @mouse_ticks.y.style.top = "#{@mouse_tracker.mousey}px"
 
-      @mouse_pos.innerText = "#{@mouse_tracker.mousex}, #{@mouse_tracker.mousey}"
+      set_text @mouse_pos, "#{@mouse_tracker.mousex}, #{@mouse_tracker.mousey}"
 
   toggle_visibility: ->
     @shown = !@shown
@@ -390,6 +396,8 @@ class JRule.Caliper
       @indicator.style.height = "#{height}px"
       @indicator.style.left = "#{x}px"
       @indicator.style.top = "#{y}px"
+      @indicator.style.zIndex = 5000
+      @indicator_size.style.display = 'block'
 
       h_dir = if @start_pos[0] > @mouse_tracker.mousex then "left" else "right"
       v_dir = if @start_pos[1] > @mouse_tracker.mousey then "up" else "down"
@@ -409,7 +417,7 @@ class JRule.Caliper
         @indicator_size.style.bottom = 0
         @indicator_size.style.top = "auto"
 
-      @indicator_size.innerText = "#{width}, #{height}"
+      set_text @indicator_size, "#{width}, #{height}"
 
   setup_indicators: ->
     indicator = document.createElement "div"
@@ -430,6 +438,7 @@ class JRule.Caliper
     indicator_size.style.backgroundColor = "#000"
     indicator_size.style.color = "#fff"
     indicator_size.style.padding = "3px"
+    indicator_size.style.zIndex = 1
     @indicator_size = indicator_size
     @indicator.appendChild @indicator_size
 
