@@ -1,4 +1,7 @@
-set_text = (el, content) ->
+#soft pitch, cause we like it easy
+underhand = {}
+
+underhand.set_text = (el, content) ->
   if el.innerText
     el.innerText = content
   else
@@ -9,19 +12,40 @@ set_text = (el, content) ->
 #an 'fn', which is the callback function
 #the second argument, el, is the element to add or remove the events from.
 #if not supplied, they default to document level
-add_events = (events, el) ->
+underhand.add_events = (events, el) ->
   for e in events
     if el?
       el.addEventListener e.type, e.fn
     else
       document.addEventListener e.type, e.fn
 
-remove_events = (events, el) ->
+underhand.remove_events = (events, el) ->
   for e in events
     if el?
       el.removeEventListener e.type, e.fn
     else
       document.removeEventListener e.type, e.fn
+
+#apply a series of styles to a dom element. 
+#expects el to be a single element
+#expects styles to be an object where the keys are style properties
+underhand.apply_styles = (el, styles) ->
+  for key, val of styles
+    el.style[key] = val
+
+underhand.extend = (first={}, second={}) ->
+  for key, val of second
+    first[key] = val
+
+  first
+
+underhand.defaults = (default_props, obj={}) ->
+  for key, val of default_props
+    if !obj.hasOwnProperty(key)
+      obj[key] = val
+
+  obj
+
 
 class JRule
   constructor: (@opts={}) ->
@@ -59,7 +83,7 @@ class JRule
 
     @events.push { type: "keydown", fn: keydown }
     
-    add_events @events
+    underhand.add_events @events
 
   setup_border_rulers: ->
     @border_rulers = new JRule.BorderRulers()
@@ -90,21 +114,27 @@ class JRule.Crosshair
         style[key] = val
 
     crosshair = document.createElement "div"
-    crosshair.style.position = "fixed"
-    crosshair.style.backgroundColor = "#{style.crosshairColor}"
-    crosshair.style.zIndex = 4000
+    styles =
+      position: "fixed"
+      backgroundColor: "#{style.crosshairColor}"
+      zIndex: 4000
+
     crosshair.className = "crosshair"
 
     if axis == "x" || axis == "horizontal"
-      crosshair.style.width = "#{style.crosshairThickness}px"
-      crosshair.style.top = 0
-      crosshair.style.bottom = 0
-      crosshair.style.left = "#{pos}"
+      underhand.extend styles,
+        width: "#{style.crosshairThickness}px"
+        top: 0
+        bottom: 0
+        left: "#{pos}"
     else
-      crosshair.style.height = "#{style.crosshairThickness}px"
-      crosshair.style.left = 0
-      crosshair.style.right = 0
-      crosshair.style.top = "#{pos}"
+      underhand.extend styles,
+        height: "#{style.crosshairThickness}px"
+        left: 0
+        right: 0
+        top: "#{pos}"
+
+    underhand.apply_styles crosshair, styles
 
     crosshair
 
@@ -127,12 +157,7 @@ class JRule.MouseTracker
         crosshairColor: "rgba(100, 100, 100, .6)"
         crosshairThickness: 1
 
-    #todo: use extend
-    for key, val of defaults
-      if !@opts.hasOwnProperty key
-        @opts[key] = val
-
-    @opts
+    underhand.defaults defaults, @opts
 
   setup_events: ->
     @events ||= []
@@ -155,7 +180,7 @@ class JRule.MouseTracker
 
     @events.push { type: "keydown", fn: keydown }
 
-    add_events @events
+    underhand.add_events @events
 
   increase_crosshair_size: ->
     @opts.style.crosshairThickness += 1
@@ -195,7 +220,7 @@ class JRule.MouseTracker
 
   destroy: ->
     @remove_crosshairs()
-    remove_events @events
+    underhand.remove_events @events
 
 
       
@@ -241,29 +266,33 @@ class JRule.BorderRulers
     
     create_ruler = =>
       rule = document.createElement("div")
-      for key, val of @get_style()
-        rule.style[key] = val
+      rule.className = "ruler" 
 
-      rule.className = "ruler"
-      rule.style.position = "fixed"
-      rule.style.zIndex = 4000 
+      styles = @get_style()
+      underhand.extend styles,
+        position: "fixed"
+        zIndex: 4000
+
+      underhand.apply_styles rule, styles
 
       rule
       
     if @opts.top
       top_ruler = create_ruler()
-      top_ruler.style.left = 0
-      top_ruler.style.right = 0
-      top_ruler.style.top = 0
-      top_ruler.style.height = "#{@opts.rule_size}px" 
+      underhand.apply_styles top_ruler, 
+        left: 0
+        right: 0
+        top: 0
+        height: "#{@opts.rule_size}px" 
       @rulers.top = top_ruler
 
     if @opts.left
       left_ruler = create_ruler()
-      left_ruler.style.left = 0
-      left_ruler.style.top = 0
-      left_ruler.style.bottom = 0
-      left_ruler.style.width = "#{@opts.rule_size}px"
+      underhand.apply_styles left_ruler,
+        left: 0
+        top: 0
+        bottom: 0
+        width: "#{@opts.rule_size}px"
       @rulers.left = left_ruler
   
     for name, ruler of @rulers
@@ -285,7 +314,7 @@ class JRule.BorderRulers
 
       @events.push { type: "jrule:mousemove", fn: mousemove }
 
-      add_events @events, document.body
+      underhand.add_events @events, document.body
 
   tick_style: (side) ->
     style =
@@ -305,21 +334,26 @@ class JRule.BorderRulers
   create_label: (side, pos) ->
     label = document.createElement "div"
     label.className = "tick_label"
-    set_text label, "#{pos}px"
-    label.style.position = "absolute"
-    label.style.fontSize = "10px"
-    label.style.fontFamily = "sans-serif"
+    underhand.set_text label, "#{pos}px"
+    style = 
+      position: "absolute"
+      fontSize: "10px"
+      fontFamily: "sans-serif"
 
     if side == "top"
-      label.style.left = "#{pos}px"
-      label.style.bottom = "2px"
-      label.style.marginLeft = "-14px"
+      underhand.extend style, 
+        left: "#{pos}px"
+        bottom: "2px"
+        marginLeft: "-14px"
     else
-      label.style.top = "#{pos}px"
-      label.style.left = "4px"
-      label.style["-webkit-transform"] = "rotate(-90deg)"
-      label.style["transform"] = "rotate(-90deg)"
-      label.style["-moz-transform"] = "rotate(-90deg)"
+      underhand.extend style, 
+        top: "#{pos}px"
+        left: "4px"
+        "-webkit-transform": "rotate(-90deg)"
+        "transform": "rotate(-90deg)"
+        "-moz-transform": "rotate(-90deg)"
+
+    underhand.apply_styles label, style
 
     label
 
@@ -356,36 +390,35 @@ class JRule.BorderRulers
         @rulers.left.appendChild @mouse_ticks.y
 
       mouse_pos = document.createElement "div"
-      mouse_pos.style.position = "fixed"
-      mouse_pos.style.zIndex = 5000
-      mouse_pos.style.left = 0
-      mouse_pos.style.top = 0
-      mouse_pos.style.padding = "6px"
-      mouse_pos.style.backgroundColor = "#888"
-      mouse_pos.style.color = "#fafafa"
-      mouse_pos.style.fontSize = "12px"
-      mouse_pos.style.fontFamily = "sans-serif"
-      mouse_pos.style.fontWeight = 100
+      style = 
+        position: "fixed"
+        zIndex: 5000
+        left: 0
+        top: 0
+        padding: "6px"
+        backgroundColor: "#888"
+        color: "#fafafa"
+        fontSize: "12px"
+        fontFamily: "sans-serif"
+        fontWeight: 100
+      underhand.apply_styles mouse_pos, style
       @mouse_pos = mouse_pos
       document.body.appendChild @mouse_pos
 
 
   create_tick: (side, pos, height=1, style_overrides={}) ->
     new_tick = document.createElement("div")
-    for key, val of @tick_style(side)
-      if style_overrides.hasOwnProperty key
-        new_tick.style[key] = style_overrides[key]
-      else
-        new_tick.style[key] = val
+    style = underhand.extend @tick_style(side), style_overrides
     new_tick.className = "tick"
 
     if side == "top" || side == "bottom"
-      new_tick.style.left = "#{pos}px"
-      new_tick.style.height = "#{100*height}%"
+      style.left = "#{pos}px"
+      style.height = "#{100*height}%"
     else
-      new_tick.style.top = "#{pos}px"
-      new_tick.style.width = "#{100*height}%"
+      style.top = "#{pos}px"
+      style.width = "#{100*height}%"
 
+    underhand.apply_styles new_tick, style
     new_tick
 
   draw_tick: (side, pos, height=1, style_overrides={}) ->
@@ -397,7 +430,7 @@ class JRule.BorderRulers
       false
 
   destroy: ->
-    remove_events @events, document.body
+    underhand.remove_events @events, document.body
 
     document.body.removeChild @mouse_pos
 
@@ -411,7 +444,7 @@ class JRule.BorderRulers
       if @mouse_ticks.y
         @mouse_ticks.y.style.top = "#{@mouse_tracker.mousey}px"
 
-      set_text @mouse_pos, "#{@mouse_tracker.mousex}, #{@mouse_tracker.mousey}"
+      underhand.set_text @mouse_pos, "#{@mouse_tracker.mousex}, #{@mouse_tracker.mousey}"
 
   toggle_visibility: ->
     @shown = !@shown
@@ -453,8 +486,8 @@ class JRule.Caliper
 
     @events.push { type: "jrule:mousemove", fn: mousemove }
 
-    add_events [{ type: "keydown", fn: keydown }]
-    add_events [{ type: "jrule:mousemove", fn: mousemove }], document.body
+    underhand.add_events [{ type: "keydown", fn: keydown }]
+    underhand.add_events [{ type: "jrule:mousemove", fn: mousemove }], document.body
 
 
   render: ->
@@ -463,54 +496,63 @@ class JRule.Caliper
       y = Math.min(@mouse_tracker.mousey, @start_pos[1])
       width = Math.max(@mouse_tracker.mousex, @start_pos[0]) -  Math.min(@mouse_tracker.mousex, @start_pos[0])
       height = Math.max(@mouse_tracker.mousey, @start_pos[1]) -  Math.min(@mouse_tracker.mousey, @start_pos[1])
-      @indicator.style.width = "#{width}px"
-      @indicator.style.height = "#{height}px"
-      @indicator.style.left = "#{x}px"
-      @indicator.style.top = "#{y}px"
-      @indicator.style.zIndex = 5000
-      @indicator_size.style.display = 'block'
+      indicator_style = 
+        width: "#{width}px"
+        height: "#{height}px"
+        left: "#{x}px"
+        top: "#{y}px"
+        zIndex: 5000
+      underhand.apply_styles @indicator, indicator_style
+
+      indicator_size_style = 
+        display: 'block'
 
       h_dir = if @start_pos[0] > @mouse_tracker.mousex then "left" else "right"
       v_dir = if @start_pos[1] > @mouse_tracker.mousey then "up" else "down"
       @drag_direction = [h_dir, v_dir]
 
       if h_dir == "left"
-        @indicator_size.style.left = 0
-        @indicator_size.style.right = "auto"
+        indicator_size_style.left = 0
+        indicator_size_style.right = "auto"
       else
-        @indicator_size.style.right = 0
-        @indicator_size.style.left = "auto"
+        indicator_size_style.right = 0
+        indicator_size_style.left = "auto"
 
       if v_dir == "up"
-        @indicator_size.style.top = 0
-        @indicator_size.style.bottom = "auto"
+        indicator_size_style.top = 0
+        indicator_size_style.bottom = "auto"
       else
-        @indicator_size.style.bottom = 0
-        @indicator_size.style.top = "auto"
+        indicator_size_style.bottom = 0
+        indicator_size_style.top = "auto"
 
-      set_text @indicator_size, "#{width}, #{height}"
+      underhand.apply_styles @indicator_size, indicator_size_style
+      underhand.set_text @indicator_size, "#{width}, #{height}"
 
   setup_indicators: ->
     indicator = document.createElement "div"
-    indicator.style.position = "fixed"
-    indicator.style.left = "#{@start_pos[0]}px"
-    indicator.style.top = "#{@start_pos[1]}px"
-    indicator.style.backgroundColor = "rgba(100, 100, 100, .4)"
-    indicator.style.zIndex = 3999
+    i_style = 
+      position: "fixed"
+      left: "#{@start_pos[0]}px"
+      top: "#{@start_pos[1]}px"
+      backgroundColor: "rgba(100, 100, 100, .4)"
+      zIndex: 3999
     @indicator = indicator
+    underhand.apply_styles @indicator, i_style
     document.body.appendChild @indicator
 
     indicator_size = document.createElement "div"
-    indicator_size.style.position = "absolute"
-    indicator_size.style.right = 0
-    indicator_size.style.bottom = 0
-    indicator_size.style.fontFamily = "sans-serif"
-    indicator_size.style.fontSize = "12px"
-    indicator_size.style.backgroundColor = "#000"
-    indicator_size.style.color = "#fff"
-    indicator_size.style.padding = "3px"
-    indicator_size.style.zIndex = 1
+    is_style = 
+      position: "absolute"
+      right: 0
+      bottom: 0
+      fontFamily: "sans-serif"
+      fontSize: "12px"
+      backgroundColor: "#000"
+      color: "#fff"
+      padding: "3px"
+      zIndex: 1
     @indicator_size = indicator_size
+    underhand.apply_styles @indicator_size, is_style
     @indicator.appendChild @indicator_size
 
   mark_spot_with_crosshair: (pos) ->
@@ -539,8 +581,8 @@ class JRule.Caliper
       keydown = e if e.type == "keydown"
       mousemove = e if e.type == "jrule:mousemove"
 
-    remove_events([{ type: "keydown", fn: keydown.fn }]) if keydown
-    remove_events([{ type: "jrule:mousemove", fn: mousemove.fn }], document.body) if mousemove
+    underhand.remove_events([{ type: "keydown", fn: keydown.fn }]) if keydown
+    underhand.remove_events([{ type: "jrule:mousemove", fn: mousemove.fn }], document.body) if mousemove
 
 class JRule.Grid
   constructor: (@opts={}) ->
@@ -587,7 +629,7 @@ class JRule.Grid
         @window_resizing = true
         @cleanup()
 
-    add_events @events, window
+    underhand.add_events @events, window
 
 
   setup_grid: ->
@@ -670,7 +712,7 @@ class JRule.Grid
 
   destroy: ->
     @cleanup()
-    remove_events @events, window
+    underhand.remove_events @events, window
 
 document.JRule = JRule
 
