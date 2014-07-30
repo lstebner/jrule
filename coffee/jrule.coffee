@@ -4,6 +4,25 @@ set_text = (el, content) ->
   else
     el.textContent = content
 
+#covenience methods for adding and removing events from the document body
+#expects an array of objects, each with a type (the event to handle) and
+#an 'fn', which is the callback function
+#the second argument, el, is the element to add or remove the events from.
+#if not supplied, they default to document level
+add_events = (events, el) ->
+  for e in events
+    if el?
+      el.addEventListener e.type, e.fn
+    else
+      document.addEventListener e.type, e.fn
+
+remove_events = (events, el) ->
+  for e in events
+    if el?
+      el.removeEventListener e.type, e.fn
+    else
+      document.removeEventListener e.type, e.fn
+
 class JRule
   constructor: (@opts={}) ->
     @setup_border_rulers()
@@ -16,14 +35,31 @@ class JRule
 
   default_opts: ->
 
+  destroy: ->
+    @caliper.destroy() if @caliper
+    @border_rulers.destroy() if @border_rulers
+    @grid.destroy() if @grid
+    @mouse_tracker.destroy() if @mouse_tracker
+    document.jruler = undefined
+
+    console?.log "Venni Vetti Vecci"
+
   setup_events: ->
-    document.addEventListener 'keydown', (e) =>
+    @events ||= []
+
+    keydown = (e) =>
       if e.keyCode == 67 #c
         @toggle_crosshairs()
       else if e.keyCode == 82 #r
         @toggle_rulers()
       else if e.keyCode == 71 #g
         @toggle_grid()
+      else if e.keyCode == 27 #esc
+        @destroy()
+
+    @events.push { type: "keydown", fn: keydown }
+    
+    add_events @events
 
   setup_border_rulers: ->
     @border_rulers = new JRule.BorderRulers()
@@ -99,7 +135,9 @@ class JRule.MouseTracker
     @opts
 
   setup_events: ->
-    document.addEventListener 'mousemove', (e) =>
+    @events ||= []
+
+    mousemove = (e) =>
       @mousex = e.clientX
       @mousey = e.clientY
       event = new Event 'jrule:mousemove'
@@ -107,11 +145,17 @@ class JRule.MouseTracker
 
       @render_crosshairs() if @opts.show_crosshairs
 
-    document.addEventListener 'keydown', (e) =>
+    @events.push { type: "mousemove", fn: mousemove }
+
+    keydown = (e) =>
       if e.keyCode == 187 #+
         @increase_crosshair_size()
       else if e.keyCode == 189 #-
         @decrease_crosshair_size()
+
+    @events.push { type: "keydown", fn: keydown }
+
+    add_events @events
 
   increase_crosshair_size: ->
     @opts.style.crosshairThickness += 1
@@ -148,6 +192,11 @@ class JRule.MouseTracker
       document.body.removeChild c
 
     @crosshairs = null
+
+  destroy: ->
+    @remove_crosshairs()
+    remove_events @events
+
 
       
 class JRule.BorderRulers
@@ -228,9 +277,15 @@ class JRule.BorderRulers
     @
 
   setup_events: ->
+    @events ||= []
+
     if @opts.show_mouse
-      document.body.addEventListener 'jrule:mousemove', (e) =>
+      mousemove = (e) =>
         @render()
+
+      @events.push { type: "jrule:mousemove", fn: mousemove }
+
+      add_events @events, document.body
 
   tick_style: (side) ->
     style =
@@ -342,6 +397,12 @@ class JRule.BorderRulers
       false
 
   destroy: ->
+    remove_events @events, document.body
+
+    document.body.removeChild @mouse_pos
+
+    for name, ruler of @rulers
+      document.body.removeChild ruler
 
   render: ->
     if @opts.show_mouse
@@ -367,7 +428,9 @@ class JRule.Caliper
     @setup_events()
 
   setup_events: ->
-    document.addEventListener 'keydown', (e) =>
+    @events ||= []
+
+    keydown = (e) =>
       if e.keyCode == 16 #shift
         @measuring = true
         @start_pos = [@mouse_tracker.mousex, @mouse_tracker.mousey]
@@ -383,8 +446,16 @@ class JRule.Caliper
 
         document.addEventListener 'keyup', keyup_fn
 
-    document.body.addEventListener 'jrule:mousemove', =>
+    @events.push { type: "keydown", fn: keydown }
+
+    mousemove = =>
       @render()
+
+    @events.push { type: "jrule:mousemove", fn: mousemove }
+
+    add_events [{ type: "keydown", fn: keydown }]
+    add_events [{ type: "jrule:mousemove", fn: mousemove }], document.body
+
 
   render: ->
     if @measuring
@@ -460,6 +531,17 @@ class JRule.Caliper
 
     document.body.style.cursor = "default"
 
+  destroy: ->
+    keydown = null
+    mousemove = null
+
+    for e in @events
+      keydown = e if e.type == "keydown"
+      mousemove = e if e.type == "jrule:mousemove"
+
+    remove_events([{ type: "keydown", fn: keydown.fn }]) if keydown
+    remove_events([{ type: "jrule:mousemove", fn: mousemove.fn }], document.body) if mousemove
+
 class JRule.Grid
   constructor: (@opts={}) ->
     @default_opts()
@@ -489,10 +571,11 @@ class JRule.Grid
     @opts
 
   setup_events: ->
+    @events ||= []
     @window_resizing = false
     @resize_to = null
 
-    window.addEventListener 'resize', (e) =>
+    resize = (e) =>
       if @window_resizing
         clearTimeout(@resize_to) if @resize_to
         @resize_to = setTimeout =>
@@ -503,6 +586,8 @@ class JRule.Grid
       else
         @window_resizing = true
         @cleanup()
+
+    add_events @events, window
 
 
   setup_grid: ->
@@ -582,6 +667,10 @@ class JRule.Grid
       @show_ticks()
     else
       @hide_ticks()
+
+  destroy: ->
+    @cleanup()
+    remove_events @events, window
 
 document.JRule = JRule
 
