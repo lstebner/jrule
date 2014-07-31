@@ -56,6 +56,7 @@ class JRule
     @setup_events()
 
     console?.log 'jrule ready!'
+    JRule.Messenger.alert 'jrule ready!'
 
   default_opts: ->
 
@@ -733,14 +734,40 @@ class JRule.Messenger
 
     @message_stack.push new JRule.Messenger
       content: msg
+      is_flash: true
 
+    #if there is more than one message in the stack then we will literally stack them
+    #up so they aren't overlapping
     if @message_stack.length > 1
       y = 10
+      request_cleanup = false
 
-      for m in @message_stack
-        if m.visible
+      for m, i in @message_stack
+        #when a message gets marked destroyed below then it becomes undefined in the
+        #message_stack so this checks for it and requests those to be cleaned up
+        if !m
+          request_cleanup = true
+        else if m.visible
           m.container.style.top = "#{y}px"
           y += m.container.clientHeight + 6
+        else if m.destroyed
+          delete @message_stack[i]
+          request_cleanup = true
+
+      if request_cleanup
+        @cleanup_message_stack()
+
+  #this method checks the message_stack for any messages that have been destroyed
+  #and removes them to keep it small. it is called periodically from @alert when
+  #a message that needs cleaned up is detected, but it is possible that the 
+  #message_stack at any time could contain several invalid messages that haven't
+  #been cleaned out yet
+  @cleanup_message_stack: ->
+    copy = []
+    for m in @message_stack
+      copy.push(m) if m && !m.destroyed
+
+    @message_stack = copy
 
   constructor: (@opts={}) ->
     @container = null
@@ -752,6 +779,7 @@ class JRule.Messenger
       content: ''
       duration: 5000
       show: true
+      is_flash: false
       type: ''
       colors: 
         alert: "rgba(0, 0, 0, .75)"
@@ -802,8 +830,11 @@ class JRule.Messenger
     @visible = false
     @container.style.display = "none"
 
+    @destroy() if @opts.is_flash
+
   destroy: ->
-    document.body.removeElement @container
+    document.body.removeChild @container
+    @destroyed = true
 
 
 

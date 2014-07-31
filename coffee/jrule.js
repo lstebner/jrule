@@ -90,6 +90,7 @@
       if (typeof console !== "undefined" && console !== null) {
         console.log('jrule ready!');
       }
+      JRule.Messenger.alert('jrule ready!');
     }
 
     JRule.prototype.default_opts = function() {};
@@ -1044,26 +1045,45 @@
 
   JRule.Messenger = (function() {
     Messenger.alert = function(msg) {
-      var m, y, _i, _len, _ref, _results;
+      var i, m, request_cleanup, y, _i, _len, _ref;
       this.message_stack || (this.message_stack = []);
       this.message_stack.push(new JRule.Messenger({
-        content: msg
+        content: msg,
+        is_flash: true
       }));
       if (this.message_stack.length > 1) {
         y = 10;
+        request_cleanup = false;
         _ref = this.message_stack;
-        _results = [];
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          m = _ref[_i];
-          if (m.visible) {
+        for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
+          m = _ref[i];
+          if (!m) {
+            request_cleanup = true;
+          } else if (m.visible) {
             m.container.style.top = "" + y + "px";
-            _results.push(y += m.container.clientHeight + 6);
-          } else {
-            _results.push(void 0);
+            y += m.container.clientHeight + 6;
+          } else if (m.destroyed) {
+            delete this.message_stack[i];
+            request_cleanup = true;
           }
         }
-        return _results;
+        if (request_cleanup) {
+          return this.cleanup_message_stack();
+        }
       }
+    };
+
+    Messenger.cleanup_message_stack = function() {
+      var copy, m, _i, _len, _ref;
+      copy = [];
+      _ref = this.message_stack;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        m = _ref[_i];
+        if (m && !m.destroyed) {
+          copy.push(m);
+        }
+      }
+      return this.message_stack = copy;
     };
 
     function Messenger(opts) {
@@ -1079,6 +1099,7 @@
         content: '',
         duration: 5000,
         show: true,
+        is_flash: false,
         type: '',
         colors: {
           alert: "rgba(0, 0, 0, .75)",
@@ -1135,11 +1156,15 @@
 
     Messenger.prototype.hide = function() {
       this.visible = false;
-      return this.container.style.display = "none";
+      this.container.style.display = "none";
+      if (this.opts.is_flash) {
+        return this.destroy();
+      }
     };
 
     Messenger.prototype.destroy = function() {
-      return document.body.removeElement(this.container);
+      document.body.removeChild(this.container);
+      return this.destroyed = true;
     };
 
     return Messenger;
