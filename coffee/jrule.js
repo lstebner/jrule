@@ -282,7 +282,12 @@
       if ((_ref = this.crosshairs.x) != null) {
         _ref.style.width = "" + this.opts.style.crosshairThickness + "px";
       }
-      return (_ref1 = this.crosshairs.y) != null ? _ref1.style.height = "" + this.opts.style.crosshairThickness + "px" : void 0;
+      if ((_ref1 = this.crosshairs.y) != null) {
+        _ref1.style.height = "" + this.opts.style.crosshairThickness + "px";
+      }
+      return JRule.Messenger.alert("" + this.opts.style.crosshairThickness + "px", {
+        duration: 600
+      });
     };
 
     MouseTracker.prototype.decrease_crosshair_size = function() {
@@ -291,7 +296,12 @@
       if ((_ref = this.crosshairs.x) != null) {
         _ref.style.width = "" + this.opts.style.crosshairThickness + "px";
       }
-      return (_ref1 = this.crosshairs.y) != null ? _ref1.style.height = "" + this.opts.style.crosshairThickness + "px" : void 0;
+      if ((_ref1 = this.crosshairs.y) != null) {
+        _ref1.style.height = "" + this.opts.style.crosshairThickness + "px";
+      }
+      return JRule.Messenger.alert("" + this.opts.style.crosshairThickness + "px", {
+        duration: 600
+      });
     };
 
     MouseTracker.prototype.setup_crosshairs = function() {
@@ -1044,13 +1054,16 @@
   }
 
   JRule.Messenger = (function() {
-    Messenger.alert = function(msg) {
+    Messenger.alert = function(msg, opts) {
       var i, m, request_cleanup, y, _i, _len, _ref;
+      if (opts == null) {
+        opts = {};
+      }
       this.message_stack || (this.message_stack = []);
-      this.message_stack.push(new JRule.Messenger({
+      this.message_stack.push(new JRule.Messenger(underhand.extend({
         content: msg,
         is_flash: true
-      }));
+      }, opts)));
       if (this.message_stack.length > 1) {
         y = 10;
         request_cleanup = false;

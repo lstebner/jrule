@@ -187,11 +187,13 @@ class JRule.MouseTracker
     @opts.style.crosshairThickness += 1
     @crosshairs.x?.style.width = "#{@opts.style.crosshairThickness}px"
     @crosshairs.y?.style.height = "#{@opts.style.crosshairThickness}px"
+    JRule.Messenger.alert "#{@opts.style.crosshairThickness}px", { duration: 600 }
 
   decrease_crosshair_size: ->
     @opts.style.crosshairThickness = Math.max 1, @opts.style.crosshairThickness - 1
     @crosshairs.x?.style.width = "#{@opts.style.crosshairThickness}px"
     @crosshairs.y?.style.height = "#{@opts.style.crosshairThickness}px"
+    JRule.Messenger.alert "#{@opts.style.crosshairThickness}px", { duration: 600 }
 
   setup_crosshairs: ->
     @crosshairs = {}
@@ -729,12 +731,13 @@ else
 
 
 class JRule.Messenger
-  @alert: (msg) ->
+  @alert: (msg, opts={}) ->
     @message_stack ||= []
 
-    @message_stack.push new JRule.Messenger
-      content: msg
-      is_flash: true
+    @message_stack.push new JRule.Messenger underhand.extend 
+          content: msg
+          is_flash: true
+        , opts
 
     #if there is more than one message in the stack then we will literally stack them
     #up so they aren't overlapping
