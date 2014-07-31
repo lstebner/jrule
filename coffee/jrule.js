@@ -1042,4 +1042,108 @@
     ready();
   }
 
+  JRule.Messenger = (function() {
+    Messenger.alert = function(msg) {
+      var m, y, _i, _len, _ref, _results;
+      this.message_stack || (this.message_stack = []);
+      this.message_stack.push(new JRule.Messenger({
+        content: msg
+      }));
+      if (this.message_stack.length > 1) {
+        y = 10;
+        _ref = this.message_stack;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          m = _ref[_i];
+          if (m.visible) {
+            m.container.style.top = "" + y + "px";
+            _results.push(y += m.container.clientHeight + 6);
+          } else {
+            _results.push(void 0);
+          }
+        }
+        return _results;
+      }
+    };
+
+    function Messenger(opts) {
+      this.opts = opts != null ? opts : {};
+      this.container = null;
+      this.default_opts();
+      this.create();
+    }
+
+    Messenger.prototype.default_opts = function() {
+      var defaults;
+      defaults = {
+        content: '',
+        duration: 5000,
+        show: true,
+        type: '',
+        colors: {
+          alert: "rgba(0, 0, 0, .75)",
+          error: "rgba(0, 0, 0, .75)"
+        }
+      };
+      return this.opts = underhand.defaults(defaults, this.opts);
+    };
+
+    Messenger.prototype.create = function() {
+      var d, style;
+      d = document.createElement("div");
+      d.className = "message " + this.opts.type;
+      style = {
+        position: "fixed",
+        top: "10px",
+        right: "10px",
+        padding: "8px 12px",
+        backgroundColor: "rgba(0, 0, 0, .8)",
+        color: "#fff",
+        display: "none",
+        zIndex: 5000,
+        fontSize: "12px",
+        fontFamily: "sans-serif",
+        borderRadius: "3px",
+        maxWidth: "300px"
+      };
+      if (this.opts.colors.hasOwnProperty(this.opts.type)) {
+        style.backgroundColor = this.opts.colors[this.opts.type];
+      }
+      underhand.apply_styles(d, style);
+      underhand.set_text(d, this.opts.content);
+      this.container = d;
+      document.body.appendChild(this.container);
+      if (this.opts.show) {
+        return this.show();
+      }
+    };
+
+    Messenger.prototype.show = function() {
+      if (!this.container) {
+        this.create();
+      }
+      this.container.style.display = "block";
+      this.visible = true;
+      if (this.opts.duration) {
+        return this.timeout = setTimeout((function(_this) {
+          return function() {
+            return _this.hide();
+          };
+        })(this), this.opts.duration);
+      }
+    };
+
+    Messenger.prototype.hide = function() {
+      this.visible = false;
+      return this.container.style.display = "none";
+    };
+
+    Messenger.prototype.destroy = function() {
+      return document.body.removeElement(this.container);
+    };
+
+    return Messenger;
+
+  })();
+
 }).call(this);

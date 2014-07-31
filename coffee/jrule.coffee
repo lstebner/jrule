@@ -727,3 +727,89 @@ else
 
 
 
+class JRule.Messenger
+  @alert: (msg) ->
+    @message_stack ||= []
+
+    @message_stack.push new JRule.Messenger
+      content: msg
+
+    if @message_stack.length > 1
+      y = 10
+
+      for m in @message_stack
+        if m.visible
+          m.container.style.top = "#{y}px"
+          y += m.container.clientHeight + 6
+
+  constructor: (@opts={}) ->
+    @container = null
+    @default_opts()
+    @create()
+
+  default_opts: ->
+    defaults = 
+      content: ''
+      duration: 5000
+      show: true
+      type: ''
+      colors: 
+        alert: "rgba(0, 0, 0, .75)"
+        error: "rgba(0, 0, 0, .75)"
+
+    @opts = underhand.defaults defaults, @opts
+
+  create: ->
+    d = document.createElement "div"
+    d.className = "message #{@opts.type}"
+
+    style = 
+      position: "fixed"
+      top: "10px"
+      right: "10px"
+      padding: "8px 12px"
+      backgroundColor: "rgba(0, 0, 0, .8)"
+      color: "#fff"
+      display: "none"
+      zIndex: 5000
+      fontSize: "12px"
+      fontFamily: "sans-serif"
+      borderRadius: "3px"
+      maxWidth: "300px"
+
+    if @opts.colors.hasOwnProperty @opts.type
+      style.backgroundColor = @opts.colors[@opts.type]
+
+    underhand.apply_styles d, style
+    underhand.set_text d, @opts.content
+
+    @container = d
+    document.body.appendChild @container
+
+    @show() if @opts.show
+
+  show: ->
+    @create() if !@container
+    @container.style.display = "block"
+    @visible = true
+
+    if @opts.duration
+      @timeout = setTimeout =>
+        @hide()
+      , @opts.duration
+
+  hide: ->
+    @visible = false
+    @container.style.display = "none"
+
+  destroy: ->
+    document.body.removeElement @container
+
+
+
+
+
+
+
+
+
