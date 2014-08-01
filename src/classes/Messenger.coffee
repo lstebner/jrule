@@ -1,5 +1,7 @@
 class JRule.Messenger
   @alert: (msg, opts={}) ->
+    return unless JRule.talkative
+
     @message_stack ||= []
 
     @message_stack.push new JRule.Messenger underhand.extend
@@ -122,6 +124,9 @@ class JRule.Messenger
     clearTimeout(@timeout) if @timeout
 
     @destroy() if @opts.is_flash
+
+  toggle: ->
+    if @visible then @hide() else @show()
 
   destroy: ->
     document.body.removeChild @container
