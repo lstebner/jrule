@@ -1,6 +1,6 @@
 class JRule.Messenger
   @alert: (msg, opts={}) ->
-    return unless JRule.talkative
+    return if !JRule.talkative && !opts.force
 
     @message_stack ||= []
 

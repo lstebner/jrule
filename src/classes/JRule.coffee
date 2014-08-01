@@ -27,6 +27,7 @@ class JRule
     @events ||= []
 
     keydown = (e) =>
+      # console.log e.keyCode
       if e.keyCode == 67 #c
         @toggle_crosshairs()
       else if e.keyCode == 82 #r
@@ -35,6 +36,9 @@ class JRule
         @toggle_grid()
       else if e.keyCode == 72 #h
         @toggle_help()
+      else if e.keyCode == 77 #m
+        JRule.talkative = !JRule.talkative
+        JRule.Messenger.alert "Messages #{if JRule.talkative then 'on' else 'off'}", { duration: 1000, force: true }
       else if e.keyCode == 27 #esc
         @destroy()
 

@@ -144,6 +144,12 @@
             return _this.toggle_grid();
           } else if (e.keyCode === 72) {
             return _this.toggle_help();
+          } else if (e.keyCode === 77) {
+            JRule.talkative = !JRule.talkative;
+            return JRule.Messenger.alert("Messages " + (JRule.talkative ? 'on' : 'off'), {
+              duration: 1000,
+              force: true
+            });
           } else if (e.keyCode === 27) {
             return _this.destroy();
           }
@@ -983,7 +989,7 @@
       if (opts == null) {
         opts = {};
       }
-      if (!JRule.talkative) {
+      if (!JRule.talkative && !opts.force) {
         return;
       }
       this.message_stack || (this.message_stack = []);
