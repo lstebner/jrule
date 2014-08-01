@@ -1,3 +1,20 @@
+# Messenger
+#
+# This class is used for sending messages to the user. These are mostly done in 
+# the form of notifications which live in the top right of the screen for a short
+# period of time and then expire. 
+#
+# Messages can contain either plain text content or html content. The duration
+# can also be configured and passing 0 would make a message last infinitely, or 
+# until dismissed from some other means such as manually or by being clicked. There
+# is no content length restriction for messages, but a css maxWidth is enforced.
+#
+# Messenger provides a static 'alert' method which can be used to flash messages
+# easily. If you use this, you get the added bonus of Messenger managing a message
+# stack and destroying them when they've completed their jobs. 
+#
+# author: lstebner
+
 class JRule.Messenger
   @alert: (msg, opts={}) ->
     return if !JRule.talkative && !opts.force

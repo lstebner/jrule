@@ -1,3 +1,13 @@
+# Caliper
+#
+# This is the Measuring Tool. It allows you to easily and quickly measure how big
+# on screen items are. By default, the 'shift' key toggles measuring on and goes from
+# your initial mouse position to wherever you drag. Releasing 'shift' then stops 
+# measuring.
+#
+# author: lstebner
+
+
 class JRule.Caliper
   constructor: (@opts={}) ->
     @mouse_tracker = JRule.MouseTracker.get_tracker()

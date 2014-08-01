@@ -1,3 +1,10 @@
+# BorderRulers
+# These are the Rulers that line the edge of the screen. They contain tick marks at
+# set intervals and also tick divisions. The major ticks are all labeled. This also
+# tracks mouse position, though it is hard/impossible to see with the crosshairs on.
+#
+# author: lstebner
+
 class JRule.BorderRulers
   constructor: (@opts={}) ->
     @rulers = {}

@@ -1,3 +1,8 @@
+# This is the main JRule object, it connects all the submodules together providing a 
+# controller of sorts for the user. By default, it's instantiated as document.jruler
+#
+# author: lstebner
+
 class JRule
   @talkative: 1
 

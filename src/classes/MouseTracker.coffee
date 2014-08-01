@@ -1,3 +1,16 @@
+# MouseTracker
+#
+# This class is useful for knowing what the mouse is up to. It provides the static
+# method 'get_tracker' which returns a MouseTracker instance that can be reused.
+# 
+# MouseTracker provides easy access at any time to the mousex and mousey positions
+# along with being able to show crosshairs. You should use MouseTracker.get_tracker
+# instead of setting up another mousemove event for anything that needs to know
+# where the mouse is. The added bonus is that you can request the position at any 
+# time and not just when an event fires.
+#
+# author: lstebner
+
 class JRule.MouseTracker
   @get_tracker: ->
     @tracker ||= new JRule.MouseTracker()

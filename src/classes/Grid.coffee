@@ -1,3 +1,16 @@
+# Grid
+#
+# The Grid is an overlay of Crosshair's at configurable intervals. Two basic Grid 
+# setups that are provided are starting from 0, 0 in the top left and dividing at
+# set intervals; or starting in the middle center and then dividing evenly towards
+# all edges. 
+#
+# The second approach is useful when viewing something with center aligned content
+# vs something that is full screen or left aligned. Note that this may cause uneven
+# divisions at the edges depending on resolution and this is expected.
+#
+# author: lstebner
+
 class JRule.Grid
   constructor: (@opts={}) ->
     @default_opts()

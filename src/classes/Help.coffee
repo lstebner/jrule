@@ -1,3 +1,11 @@
+# Help! - extends Messenger
+#
+# This class is really just a Messenger message that contains a lot of content so it was
+# easiest to break it out. For convenience, there is also a static method to retrieve a
+# single instance of Help to be reused.
+#
+# author: lstebner
+
 class JRule.Help extends JRule.Messenger
   @get: ->
     @help ||= new JRule.Help()

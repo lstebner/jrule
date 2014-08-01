@@ -1,3 +1,11 @@
+# Crosshair
+#
+# The crosshairs have two functions. The first (and maybe obvious) is to follow the 
+# mouse and act as aiming crosshairs do with live updating. The second is that they
+# can be placed statically. An example of this would be creating a Grid.
+#
+# author: lstebner
+
 class JRule.Crosshair
   @create: (axis, pos="50%", style={}) ->
     style_defaults =
