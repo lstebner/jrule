@@ -742,7 +742,7 @@ class JRule.Messenger
     #if there is more than one message in the stack then we will literally stack them
     #up so they aren't overlapping
     if @message_stack.length > 1
-      y = 10
+      y = 36
       request_cleanup = false
 
       for m, i in @message_stack
@@ -796,7 +796,7 @@ class JRule.Messenger
 
     style = 
       position: "fixed"
-      top: "10px"
+      top: "36px"
       right: "10px"
       padding: "8px 12px"
       backgroundColor: "rgba(0, 0, 0, .8)"

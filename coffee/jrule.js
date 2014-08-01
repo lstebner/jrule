@@ -1065,7 +1065,7 @@
         is_flash: true
       }, opts)));
       if (this.message_stack.length > 1) {
-        y = 10;
+        y = 36;
         request_cleanup = false;
         _ref = this.message_stack;
         for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
@@ -1128,7 +1128,7 @@
       d.className = "message " + this.opts.type;
       style = {
         position: "fixed",
-        top: "10px",
+        top: "36px",
         right: "10px",
         padding: "8px 12px",
         backgroundColor: "rgba(0, 0, 0, .8)",
