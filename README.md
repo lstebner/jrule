@@ -44,6 +44,18 @@ The only thing easier than needing to include this code into your project is the
 
 ## Using the Library Directly
 
+## update 7/31/14
+
+JRule was up until today a single file library, but it was getting far too unruly (pun-intended). So, I had to break it apart. In my development workflow I have used Codekit for several years now because I find it the easiest way to do this sort of thing without any extra configuration. 
+
+tl;dr
+
+JRule is now made up of multiple files and I'm relying on Codekit to compile the main one. All the components are now found under the `src` directory with main JRule classes in the `src/classes` folder and helpers in `src/helpers`.
+
+If you only want the final compiled library, that's still one easy to use file but it's now `src/main.js`. 
+
+=======================
+
 Alternatively to the Bookmarklet, you may decide to clone the source and instantiate it yourself so that you have more control. Doing this is easy also because there is only one file you need to include, `jrule.js`. Once you have this included, you're done! It handles creating the `document.jruler` object on its own and you can then access any of the JRule methods/properties from there.
 
 ## Feedback
@@ -56,7 +68,6 @@ These are the things that I've thought of to add, but feel free to file requests
 
 - A customizable grid overlay
 - Expose other configuration options (colors, tick distance, divisions, etc)
-- Shortcut to toggle entire JRule UI
 - Fixed ratio for Measuring Tool
 - Fixed dimensions for Measuring Tool
 - Snapping for measuring tool
