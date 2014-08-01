@@ -124,6 +124,8 @@ class JRule.Grid
     else
       @hide_ticks()
 
+    @shown
+
   destroy: ->
     @cleanup()
     underhand.remove_events @events, window

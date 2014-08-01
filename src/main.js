@@ -96,6 +96,8 @@
    */
 
   JRule = (function() {
+    JRule.talkative = 1;
+
     function JRule(opts) {
       this.opts = opts != null ? opts : {};
       this.setup_border_rulers();
@@ -141,7 +143,7 @@
           } else if (e.keyCode === 71) {
             return _this.toggle_grid();
           } else if (e.keyCode === 72) {
-            return _this.show_help();
+            return _this.toggle_help();
           } else if (e.keyCode === 27) {
             return _this.destroy();
           }
@@ -167,19 +169,31 @@
     };
 
     JRule.prototype.toggle_crosshairs = function() {
-      return this.mouse_tracker.toggle_crosshairs();
+      var shown;
+      shown = this.mouse_tracker.toggle_crosshairs();
+      return JRule.Messenger.alert("Crosshairs " + (shown ? 'on' : 'off'), {
+        duration: 1000
+      });
     };
 
     JRule.prototype.toggle_rulers = function() {
-      return this.border_rulers.toggle_visibility();
+      var shown;
+      shown = this.border_rulers.toggle_visibility();
+      return JRule.Messenger.alert("Rulers " + (shown ? 'on' : 'off'), {
+        duration: 1000
+      });
     };
 
     JRule.prototype.toggle_grid = function() {
-      return this.grid.toggle_grid();
+      var shown;
+      shown = this.grid.toggle_grid();
+      return JRule.Messenger.alert("Grid " + (shown ? 'on' : 'off'), {
+        duration: 1000
+      });
     };
 
-    JRule.prototype.show_help = function() {
-      return JRule.Help.show();
+    JRule.prototype.toggle_help = function() {
+      return JRule.Help.get().toggle();
     };
 
     return JRule;
@@ -474,15 +488,14 @@
     };
 
     BorderRulers.prototype.toggle_visibility = function() {
-      var ruler, side, _ref, _results;
+      var ruler, side, _ref;
       this.shown = !this.shown;
       _ref = this.rulers;
-      _results = [];
       for (side in _ref) {
         ruler = _ref[side];
-        _results.push(ruler.style.display = this.shown ? "block" : "none");
+        ruler.style.display = this.shown ? "block" : "none";
       }
-      return _results;
+      return this.shown;
     };
 
     return BorderRulers;
@@ -934,10 +947,11 @@
     Grid.prototype.toggle_grid = function() {
       this.shown = !this.shown;
       if (this.shown) {
-        return this.show_ticks();
+        this.show_ticks();
       } else {
-        return this.hide_ticks();
+        this.hide_ticks();
       }
+      return this.shown;
     };
 
     Grid.prototype.destroy = function() {
@@ -968,6 +982,9 @@
       var i, m, request_cleanup, y, _i, _len, _ref;
       if (opts == null) {
         opts = {};
+      }
+      if (!JRule.talkative) {
+        return;
       }
       this.message_stack || (this.message_stack = []);
       this.message_stack.push(new JRule.Messenger(underhand.extend({
@@ -1114,6 +1131,14 @@
       }
     };
 
+    Messenger.prototype.toggle = function() {
+      if (this.visible) {
+        return this.hide();
+      } else {
+        return this.show();
+      }
+    };
+
     Messenger.prototype.destroy = function() {
       document.body.removeChild(this.container);
       this.destroyed = true;
@@ -1138,9 +1163,8 @@
       return Help.__super__.constructor.apply(this, arguments);
     }
 
-    Help.show = function() {
-      this.help || (this.help = new JRule.Help());
-      return this.help.show();
+    Help.get = function() {
+      return this.help || (this.help = new JRule.Help());
     };
 
     Help.prototype.default_opts = function() {
@@ -1149,6 +1173,7 @@
       return underhand.extend(Help.__super__.default_opts.apply(this, arguments), {
         html_content: content,
         is_flash: false,
+        show: false,
         duration: 0
       });
     };
@@ -1281,8 +1306,9 @@
     MouseTracker.prototype.toggle_crosshairs = function() {
       this.opts.show_crosshairs = !this.opts.show_crosshairs;
       if (!this.opts.show_crosshairs) {
-        return this.remove_crosshairs();
+        this.remove_crosshairs();
       }
+      return this.opts.show_crosshairs;
     };
 
     MouseTracker.prototype.remove_crosshairs = function() {

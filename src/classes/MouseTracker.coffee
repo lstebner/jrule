@@ -73,6 +73,7 @@ class JRule.MouseTracker
     @opts.show_crosshairs = !@opts.show_crosshairs
 
     @remove_crosshairs() if !@opts.show_crosshairs
+    @opts.show_crosshairs
 
   remove_crosshairs: ->
     for coord, c of @crosshairs

@@ -224,3 +224,5 @@ class JRule.BorderRulers
 
     for side, ruler of @rulers
       ruler.style.display = if @shown then "block" else "none"
+
+    @shown

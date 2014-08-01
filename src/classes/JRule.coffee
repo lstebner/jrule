@@ -1,4 +1,6 @@
 class JRule
+  @talkative: 1
+
   constructor: (@opts={}) ->
     @setup_border_rulers()
     @setup_caliper()
@@ -32,7 +34,7 @@ class JRule
       else if e.keyCode == 71 #g
         @toggle_grid()
       else if e.keyCode == 72 #h
-        @show_help()
+        @toggle_help()
       else if e.keyCode == 27 #esc
         @destroy()
 
@@ -50,13 +52,16 @@ class JRule
     @grid = new JRule.Grid()
 
   toggle_crosshairs: ->
-    @mouse_tracker.toggle_crosshairs()
+    shown = @mouse_tracker.toggle_crosshairs()
+    JRule.Messenger.alert "Crosshairs #{if shown then 'on' else 'off'}", { duration: 1000 }
 
   toggle_rulers: ->
-    @border_rulers.toggle_visibility()
+    shown = @border_rulers.toggle_visibility()
+    JRule.Messenger.alert "Rulers #{if shown then 'on' else 'off'}", { duration: 1000 }
 
   toggle_grid: ->
-    @grid.toggle_grid()
+    shown = @grid.toggle_grid()
+    JRule.Messenger.alert "Grid #{if shown then 'on' else 'off'}", { duration: 1000 }
 
-  show_help: ->
-    JRule.Help.show()
+  toggle_help: ->
+    JRule.Help.get().toggle()

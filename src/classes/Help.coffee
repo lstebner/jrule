@@ -1,7 +1,6 @@
 class JRule.Help extends JRule.Messenger
-  @show: ->
+  @get: ->
     @help ||= new JRule.Help()
-    @help.show()
 
   default_opts: ->
     content = "
@@ -21,4 +20,6 @@ class JRule.Help extends JRule.Messenger
     underhand.extend super,
       html_content: content
       is_flash: false
+      show: false #this false value is actually a trick because when .toggle() is called
+                  #immediately after creation, the message ends up visible
       duration: 0
