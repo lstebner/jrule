@@ -1,3 +1,11 @@
+# underhand
+#
+# underhand is a module for all the helpers that JRule uses. Some of these are 
+# similar to methods you would find in underscore (such as extend), but others
+# are just convenience methods for things I found myself doing over and over. 
+#
+# author: lstebner
+
 #soft pitch, cause we like it easy
 underhand = {}
 
