@@ -9,7 +9,7 @@ class JRule.BorderRulers
     @setup_events()
     
   default_opts: ->
-    defaults = 
+    defaults =
       style:
         backgroundColor: "#aaa"
         opacity: .5
@@ -40,7 +40,7 @@ class JRule.BorderRulers
     
     create_ruler = =>
       rule = document.createElement("div")
-      rule.className = "ruler" 
+      rule.className = "ruler"
 
       styles = @get_style()
       underhand.extend styles,
@@ -53,11 +53,11 @@ class JRule.BorderRulers
       
     if @opts.top
       top_ruler = create_ruler()
-      underhand.apply_styles top_ruler, 
+      underhand.apply_styles top_ruler,
         left: 0
         right: 0
         top: 0
-        height: "#{@opts.rule_size}px" 
+        height: "#{@opts.rule_size}px"
       @rulers.top = top_ruler
 
     if @opts.left
@@ -77,7 +77,6 @@ class JRule.BorderRulers
 
     @shown = true
     @setup = true
-    @
 
   setup_events: ->
     @events ||= []
@@ -93,7 +92,7 @@ class JRule.BorderRulers
   tick_style: (side) ->
     style =
       position: "absolute"
-      display: "block" 
+      display: "block"
       backgroundColor: @opts.style.tickColor
 
     if side == "top" || side == "bottom"
@@ -109,18 +108,18 @@ class JRule.BorderRulers
     label = document.createElement "div"
     label.className = "tick_label"
     underhand.set_text label, "#{pos}px"
-    style = 
+    style =
       position: "absolute"
       fontSize: "10px"
       fontFamily: "sans-serif"
 
     if side == "top"
-      underhand.extend style, 
+      underhand.extend style,
         left: "#{pos}px"
         bottom: "2px"
         marginLeft: "-14px"
     else
-      underhand.extend style, 
+      underhand.extend style,
         top: "#{pos}px"
         left: "4px"
         "-webkit-transform": "rotate(-90deg)"
@@ -164,7 +163,7 @@ class JRule.BorderRulers
         @rulers.left.appendChild @mouse_ticks.y
 
       mouse_pos = document.createElement "div"
-      style = 
+      style =
         position: "fixed"
         zIndex: 5000
         left: 0
@@ -199,7 +198,7 @@ class JRule.BorderRulers
     if @rulers.hasOwnProperty side
       new_tick = @create_tick side, pos, height, style_overrides
 
-      @rulers[side].appendChild new_tick 
+      @rulers[side].appendChild new_tick
     else
       false
 

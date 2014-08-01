@@ -5,7 +5,7 @@ class JRule.Grid
     @setup_events()
 
   default_opts: ->
-    defaults = 
+    defaults =
       tick_distance: 100 #px
       divisions: 3
       show: false
@@ -18,7 +18,7 @@ class JRule.Grid
     for key, val of defaults
       if !@opts.hasOwnProperty key
         @opts[key] = val
-      #one level deep for now, should make recursive. 
+      #one level deep for now, should make recursive.
       else if typeof @opts[key] == "object"
         for key2, val2 of @opts[key]
           if !@opts[key].hasOwnProperty key2
@@ -56,7 +56,7 @@ class JRule.Grid
     if @opts.start_in_center
       num_ticks = num_ticks / 2
       @ticks.push JRule.Crosshair.create 'x', "#{center_x}px", { crosshairColor: @opts.style.centerLineColor }
-      @ticks.push JRule.Crosshair.create 'y', "#{center_y}px", { crosshairColor: @opts.style.centerLineColor }      
+      @ticks.push JRule.Crosshair.create 'y', "#{center_y}px", { crosshairColor: @opts.style.centerLineColor }
 
       if @opts.divisions > 0
         for n in [1...@opts.divisions]
@@ -87,7 +87,7 @@ class JRule.Grid
 
       if @opts.start_in_center
         @ticks.push JRule.Crosshair.create 'x', "#{center_x - offset}px", { crosshairColor: @opts.style.tickLineColor }
-        @ticks.push JRule.Crosshair.create 'y', "#{center_y - offset}px", { crosshairColor: @opts.style.tickLineColor }        
+        @ticks.push JRule.Crosshair.create 'y', "#{center_y - offset}px", { crosshairColor: @opts.style.tickLineColor }
 
         if @opts.divisions > 0
           for n in [1...@opts.divisions]

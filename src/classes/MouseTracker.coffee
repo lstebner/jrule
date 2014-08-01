@@ -11,7 +11,7 @@ class JRule.MouseTracker
     @setup_crosshairs() if @opts.show_crosshairs
 
   default_opts: ->
-    defaults = 
+    defaults =
       show_crosshairs: true
       style:
         crosshairColor: "rgba(100, 100, 100, .6)"
@@ -65,7 +65,7 @@ class JRule.MouseTracker
 
   render_crosshairs: ->
     @setup_crosshairs() if !@crosshairs
-    offset = if @opts.style.crosshairThickness == 1 then 0 else Math.round(@opts.style.crosshairThickness / 2)  
+    offset = if @opts.style.crosshairThickness == 1 then 0 else Math.round(@opts.style.crosshairThickness / 2)
     @crosshairs.x.style.left = "#{@mousex - offset}px"
     @crosshairs.y.style.top = "#{@mousey - offset}px"
 

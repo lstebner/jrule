@@ -1,6 +1,6 @@
 class JRule.Crosshair
   @create: (axis, pos="50%", style={}) ->
-    style_defaults = 
+    style_defaults =
       crosshairColor: "rgba(100, 100, 100, .5)"
       crosshairThickness: 1
 

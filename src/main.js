@@ -279,8 +279,7 @@
       }
       this.setup_ticks();
       this.shown = true;
-      this.setup = true;
-      return this;
+      return this.setup = true;
     };
 
     BorderRulers.prototype.setup_events = function() {

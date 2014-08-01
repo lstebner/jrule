@@ -2,10 +2,10 @@ class JRule.Messenger
   @alert: (msg, opts={}) ->
     @message_stack ||= []
 
-    @message_stack.push new JRule.Messenger underhand.extend 
-          content: msg
-          is_flash: true
-        , opts
+    @message_stack.push new JRule.Messenger underhand.extend
+      content: msg
+      is_flash: true
+    , opts
 
     #if there is more than one message in the stack then we will literally stack them
     #up so they aren't overlapping
@@ -30,7 +30,7 @@ class JRule.Messenger
 
   #this method checks the message_stack for any messages that have been destroyed
   #and removes them to keep it small. it is called periodically from @alert when
-  #a message that needs cleaned up is detected, but it is possible that the 
+  #a message that needs cleaned up is detected, but it is possible that the
   #message_stack at any time could contain several invalid messages that haven't
   #been cleaned out yet
   @cleanup_message_stack: ->
@@ -60,13 +60,13 @@ class JRule.Messenger
     underhand.add_events @events, @container
 
   default_opts: ->
-    defaults = 
+    defaults =
       content: ''
       duration: 5000
       show: true
       is_flash: false
       type: ''
-      colors: 
+      colors:
         alert: "rgba(0, 0, 0, .75)"
         error: "rgba(0, 0, 0, .75)"
 
@@ -76,7 +76,7 @@ class JRule.Messenger
     d = document.createElement "div"
     d.className = "message #{@opts.type}"
 
-    style = 
+    style =
       position: "fixed"
       top: "36px"
       right: "10px"

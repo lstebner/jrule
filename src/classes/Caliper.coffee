@@ -40,7 +40,7 @@ class JRule.Caliper
       y = Math.min(@mouse_tracker.mousey, @start_pos[1])
       width = Math.max(@mouse_tracker.mousex, @start_pos[0]) -  Math.min(@mouse_tracker.mousex, @start_pos[0])
       height = Math.max(@mouse_tracker.mousey, @start_pos[1]) -  Math.min(@mouse_tracker.mousey, @start_pos[1])
-      indicator_style = 
+      indicator_style =
         width: "#{width}px"
         height: "#{height}px"
         left: "#{x}px"
@@ -48,7 +48,7 @@ class JRule.Caliper
         zIndex: 5000
       underhand.apply_styles @indicator, indicator_style
 
-      indicator_size_style = 
+      indicator_size_style =
         display: 'block'
 
       h_dir = if @start_pos[0] > @mouse_tracker.mousex then "left" else "right"
@@ -74,7 +74,7 @@ class JRule.Caliper
 
   setup_indicators: ->
     indicator = document.createElement "div"
-    i_style = 
+    i_style =
       position: "fixed"
       left: "#{@start_pos[0]}px"
       top: "#{@start_pos[1]}px"
@@ -85,7 +85,7 @@ class JRule.Caliper
     document.body.appendChild @indicator
 
     indicator_size = document.createElement "div"
-    is_style = 
+    is_style =
       position: "absolute"
       right: 0
       bottom: 0

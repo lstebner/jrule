@@ -26,7 +26,7 @@ underhand.remove_events = (events, el) ->
     else
       document.removeEventListener e.type, e.fn
 
-#apply a series of styles to a dom element. 
+#apply a series of styles to a dom element.
 #expects el to be a single element
 #expects styles to be an object where the keys are style properties
 underhand.apply_styles = (el, styles) ->
