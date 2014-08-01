@@ -103,6 +103,7 @@
       this.setup_border_rulers();
       this.setup_caliper();
       this.setup_grid();
+      this.setup_mandolin();
       this.mouse_tracker = JRule.MouseTracker.get_tracker();
       this.setup_events();
       if (typeof console !== "undefined" && console !== null) {
@@ -172,6 +173,10 @@
 
     JRule.prototype.setup_grid = function() {
       return this.grid = new JRule.Grid();
+    };
+
+    JRule.prototype.setup_mandolin = function() {
+      return this.mandolin = new JRule.Mandolin();
     };
 
     JRule.prototype.toggle_crosshairs = function() {
@@ -975,6 +980,134 @@
        Begin Mandolin.coffee
   --------------------------------------------
    */
+
+  JRule.Mandolin = (function() {
+    function Mandolin(opts) {
+      this.opts = opts != null ? opts : {};
+      this.slices = [];
+      this.tracker = JRule.MouseTracker.get_tracker();
+      this.default_opts();
+      this.setup_events();
+    }
+
+    Mandolin.prototype.default_opts = function() {
+      var defaults;
+      defaults = {
+        snap: true,
+        snap_to: 10,
+        style: {
+          sliceColor: "rgba(150, 150, 150, .5)"
+        }
+      };
+      return this.opts = underhand.defaults(defaults, this.opts);
+    };
+
+    Mandolin.prototype.setup_events = function() {
+      var keydown;
+      this.events || (this.events = []);
+      keydown = (function(_this) {
+        return function(e) {
+          if (e.keyCode === 83) {
+            return _this.create_slice_at_mouse();
+          } else if (e.keyCode === 68) {
+            return _this.create_divide_at_mouse();
+          }
+        };
+      })(this);
+      this.events.push({
+        type: "keydown",
+        fn: keydown
+      });
+      return underhand.add_events(this.events);
+    };
+
+    Mandolin.prototype.get_snap_for = function(pos) {
+      var i, snap_to, snapped;
+      snap_to = pos;
+      snapped = pos % this.opts.snap_to === 0;
+      i = 0;
+      while (!snapped) {
+        i += 1;
+        if ((pos + i) % this.opts.snap_to === 0) {
+          snap_to = pos + i;
+          snapped = true;
+        } else if ((pos - i) % this.opts.snap_to === 0) {
+          snap_to = pos - i;
+          snapped = true;
+        }
+      }
+      return snap_to;
+    };
+
+    Mandolin.prototype.create_slice = function(pos) {
+      var slice;
+      if (this.opts.snap) {
+        pos = this.get_snap_for(pos);
+      }
+      slice = JRule.Crosshair.create('x', "" + pos + "px", {
+        backgroundColor: this.opts.style.sliceColor
+      });
+      JRule.Messenger.alert("Slice created at " + pos + "px");
+      document.body.appendChild(slice);
+      return this.slices.push(slice);
+    };
+
+    Mandolin.prototype.create_divide = function(pos) {
+      var slice;
+      if (this.opts.snap) {
+        pos = this.get_snap_for(pos);
+      }
+      slice = JRule.Crosshair.create('y', "" + pos + "px", {
+        backgroundColor: this.opts.style.sliceColor
+      });
+      JRule.Messenger.alert("Divide created at " + pos + "px");
+      document.body.appendChild(slice);
+      return this.slices.push(slice);
+    };
+
+    Mandolin.prototype.create_slice_at_mouse = function() {
+      return this.create_slice(this.tracker.mousex);
+    };
+
+    Mandolin.prototype.create_divide_at_mouse = function() {
+      return this.create_divide(this.tracker.mousey);
+    };
+
+    Mandolin.prototype.clear_slices = function() {
+      var s, _i, _len, _ref;
+      _ref = this.slices;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        s = _ref[_i];
+        document.body.removeChild(s);
+      }
+      return this.slices = [];
+    };
+
+    Mandolin.prototype.hide_slices = function() {
+      var s, _i, _len, _ref, _results;
+      _ref = this.slices;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        s = _ref[_i];
+        _results.push(s.style.display = "none");
+      }
+      return _results;
+    };
+
+    Mandolin.prototype.show_slices = function() {
+      var s, _i, _len, _ref, _results;
+      _ref = this.slices;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        s = _ref[_i];
+        _results.push(s.style.display = "block");
+      }
+      return _results;
+    };
+
+    return Mandolin;
+
+  })();
 
 
   /*

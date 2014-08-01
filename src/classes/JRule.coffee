@@ -10,6 +10,7 @@ class JRule
     @setup_border_rulers()
     @setup_caliper()
     @setup_grid()
+    @setup_mandolin()
     @mouse_tracker = JRule.MouseTracker.get_tracker()
     @setup_events()
 
@@ -59,6 +60,9 @@ class JRule
 
   setup_grid: ->
     @grid = new JRule.Grid()
+
+  setup_mandolin: ->
+    @mandolin = new JRule.Mandolin()
 
   toggle_crosshairs: ->
     shown = @mouse_tracker.toggle_crosshairs()

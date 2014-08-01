@@ -4,6 +4,10 @@
 # mouse and act as aiming crosshairs do with live updating. The second is that they
 # can be placed statically. An example of this would be creating a Grid.
 #
+# This class is really just a "line" though because it allows you to easily create
+# a single crosshair at a given position. The Grid and MouseTracker classes handle
+# the more complex components of the above mentioned crosshair uses.  
+#
 # author: lstebner
 
 class JRule.Crosshair
