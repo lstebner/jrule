@@ -1104,7 +1104,27 @@
       this.container = null;
       this.default_opts();
       this.create();
+      this.setup_events();
     }
+
+    Messenger.prototype.setup_events = function() {
+      var onclick;
+      this.events || (this.events = []);
+      if (!this.container) {
+        return;
+      }
+      onclick = (function(_this) {
+        return function(e) {
+          e.preventDefault();
+          return _this.hide();
+        };
+      })(this);
+      this.events.push({
+        type: 'click',
+        fn: onclick
+      });
+      return underhand.add_events(this.events, this.container);
+    };
 
     Messenger.prototype.default_opts = function() {
       var defaults;
@@ -1170,6 +1190,9 @@
     Messenger.prototype.hide = function() {
       this.visible = false;
       this.container.style.display = "none";
+      if (this.timeout) {
+        clearTimeout(this.timeout);
+      }
       if (this.opts.is_flash) {
         return this.destroy();
       }
@@ -1177,7 +1200,8 @@
 
     Messenger.prototype.destroy = function() {
       document.body.removeChild(this.container);
-      return this.destroyed = true;
+      this.destroyed = true;
+      return underhand.remove_events(this.events, this.container);
     };
 
     return Messenger;

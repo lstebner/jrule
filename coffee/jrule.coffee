@@ -776,6 +776,20 @@ class JRule.Messenger
     @container = null
     @default_opts()
     @create()
+    @setup_events()
+
+  setup_events: ->
+    @events ||= []
+
+    return unless @container
+
+    onclick = (e) =>
+      e.preventDefault()
+      @hide()
+
+    @events.push { type: 'click', fn: onclick }
+
+    underhand.add_events @events, @container
 
   default_opts: ->
     defaults = 
@@ -832,12 +846,14 @@ class JRule.Messenger
   hide: ->
     @visible = false
     @container.style.display = "none"
+    clearTimeout(@timeout) if @timeout
 
     @destroy() if @opts.is_flash
 
   destroy: ->
     document.body.removeChild @container
     @destroyed = true
+    underhand.remove_events @events, @container
 
 
 
