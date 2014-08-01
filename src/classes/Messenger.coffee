@@ -62,6 +62,7 @@ class JRule.Messenger
   default_opts: ->
     defaults =
       content: ''
+      html_content: false
       duration: 5000
       show: true
       is_flash: false
@@ -85,16 +86,20 @@ class JRule.Messenger
       color: "#fff"
       display: "none"
       zIndex: 5000
-      fontSize: "12px"
+      fontSize: "14px"
       fontFamily: "sans-serif"
       borderRadius: "3px"
       maxWidth: "300px"
+      cursor: "pointer"
 
     if @opts.colors.hasOwnProperty @opts.type
       style.backgroundColor = @opts.colors[@opts.type]
 
     underhand.apply_styles d, style
-    underhand.set_text d, @opts.content
+    if @opts.html_content
+      d.innerHTML = @opts.html_content
+    else
+      underhand.set_text d, @opts.content
 
     @container = d
     document.body.appendChild @container

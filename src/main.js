@@ -7,7 +7,9 @@
  */
 
 (function() {
-  var JRule, ready, underhand;
+  var JRule, ready, underhand,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   underhand = {};
 
@@ -105,6 +107,7 @@
         console.log('jrule ready!');
       }
       JRule.Messenger.alert('jrule ready!');
+      JRule.Messenger.alert('Press "h" to view help');
     }
 
     JRule.prototype.default_opts = function() {};
@@ -137,6 +140,8 @@
             return _this.toggle_rulers();
           } else if (e.keyCode === 71) {
             return _this.toggle_grid();
+          } else if (e.keyCode === 72) {
+            return _this.show_help();
           } else if (e.keyCode === 27) {
             return _this.destroy();
           }
@@ -171,6 +176,10 @@
 
     JRule.prototype.toggle_grid = function() {
       return this.grid.toggle_grid();
+    };
+
+    JRule.prototype.show_help = function() {
+      return JRule.Help.show();
     };
 
     return JRule;
@@ -1031,6 +1040,7 @@
       var defaults;
       defaults = {
         content: '',
+        html_content: false,
         duration: 5000,
         show: true,
         is_flash: false,
@@ -1056,16 +1066,21 @@
         color: "#fff",
         display: "none",
         zIndex: 5000,
-        fontSize: "12px",
+        fontSize: "14px",
         fontFamily: "sans-serif",
         borderRadius: "3px",
-        maxWidth: "300px"
+        maxWidth: "300px",
+        cursor: "pointer"
       };
       if (this.opts.colors.hasOwnProperty(this.opts.type)) {
         style.backgroundColor = this.opts.colors[this.opts.type];
       }
       underhand.apply_styles(d, style);
-      underhand.set_text(d, this.opts.content);
+      if (this.opts.html_content) {
+        d.innerHTML = this.opts.html_content;
+      } else {
+        underhand.set_text(d, this.opts.content);
+      }
       this.container = d;
       document.body.appendChild(this.container);
       if (this.opts.show) {
@@ -1108,6 +1123,39 @@
     return Messenger;
 
   })();
+
+
+  /*
+  --------------------------------------------
+       Begin Help.coffee
+  --------------------------------------------
+   */
+
+  JRule.Help = (function(_super) {
+    __extends(Help, _super);
+
+    function Help() {
+      return Help.__super__.constructor.apply(this, arguments);
+    }
+
+    Help.show = function() {
+      this.help || (this.help = new JRule.Help());
+      return this.help.show();
+    };
+
+    Help.prototype.default_opts = function() {
+      var content;
+      content = "Welcome to JRule! Thanks for using it. <br><br> JRule helps you measure and line things up. It's simple to use, here are some controls: <br> Press 'c' to toggle the Crosshairs<br> Press 'g' to toggle the Grid<br> Press 'r' to toggle the Rulers<br> Hold 'shift' and move the mouse to Measure<br> Press 'h' to see this message again<br> Click this message to get rid of it<br> Press 'escape' to remove JRule when you're done<br>";
+      return underhand.extend(Help.__super__.default_opts.apply(this, arguments), {
+        html_content: content,
+        is_flash: false,
+        duration: 0
+      });
+    };
+
+    return Help;
+
+  })(JRule.Messenger);
 
 
   /*

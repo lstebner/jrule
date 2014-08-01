@@ -9,6 +9,7 @@
 # @codekit-prepend "classes/Grid.coffee"
 # @codekit-prepend "classes/Mandolin.coffee"
 # @codekit-prepend "classes/Messenger.coffee"
+# @codekit-prepend "classes/Help.coffee"
 # @codekit-prepend "classes/MouseTracker.coffee"
 
 document.JRule = JRule

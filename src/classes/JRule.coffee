@@ -8,6 +8,7 @@ class JRule
 
     console?.log 'jrule ready!'
     JRule.Messenger.alert 'jrule ready!'
+    JRule.Messenger.alert 'Press "h" to view help'
 
   default_opts: ->
 
@@ -30,6 +31,8 @@ class JRule
         @toggle_rulers()
       else if e.keyCode == 71 #g
         @toggle_grid()
+      else if e.keyCode == 72 #h
+        @show_help()
       else if e.keyCode == 27 #esc
         @destroy()
 
@@ -54,3 +57,6 @@ class JRule
 
   toggle_grid: ->
     @grid.toggle_grid()
+
+  show_help: ->
+    JRule.Help.show()
