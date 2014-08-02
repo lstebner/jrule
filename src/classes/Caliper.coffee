@@ -28,6 +28,8 @@ class JRule.Caliper
         keyup_fn = =>
           @measuring = false
           @end_pos = [@mouse_tracker.mousex, @mouse_tracker.mousey]
+          @last_size = [Math.abs(@end_pos[0] - @start_pos[0]), Math.abs(@end_pos[1] - @start_pos[1])]
+          JRule.Messenger.alert "#{@last_size[0]}x#{@last_size[1]}"
           document.removeEventListener 'keyup', keyup_fn
           @cleanup()
 

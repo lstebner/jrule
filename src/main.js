@@ -550,6 +550,8 @@
             keyup_fn = function() {
               _this.measuring = false;
               _this.end_pos = [_this.mouse_tracker.mousex, _this.mouse_tracker.mousey];
+              _this.last_size = [Math.abs(_this.end_pos[0] - _this.start_pos[0]), Math.abs(_this.end_pos[1] - _this.start_pos[1])];
+              JRule.Messenger.alert("" + _this.last_size[0] + "x" + _this.last_size[1]);
               document.removeEventListener('keyup', keyup_fn);
               return _this.cleanup();
             };
