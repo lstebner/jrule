@@ -16,7 +16,7 @@ class JRule.Mandolin
 
   default_opts: ->
     defaults =
-      snap: true
+      snap: false
       snap_to: 10
       style:
         sliceColor: "rgba(150, 150, 150, .5)"
@@ -93,4 +93,8 @@ class JRule.Mandolin
 
   show_slices: ->
     s.style.display = "block" for s in @slices
+
+  destroy: ->
+    @clear_slices()
+    underhand.remove_events @events
 
