@@ -21,6 +21,10 @@ class JRule.Messenger
 
     @message_stack ||= []
 
+    if opts.is_html
+      opts.html_content = msg
+      opts.content = ''
+
     @message_stack.push new JRule.Messenger underhand.extend
       content: msg
       is_flash: true
@@ -71,10 +75,24 @@ class JRule.Messenger
     return unless @container
 
     onclick = (e) =>
+      return true if e.target.tagName.toLowerCase() == "a"
+
       e.preventDefault()
       @hide()
 
     @events.push { type: 'click', fn: onclick }
+
+    mouseenter = (e) =>
+      clearTimeout(@timeout) if @timeout
+
+    @events.push { type: 'mouseenter', fn: mouseenter }
+
+    mouseleave = (e) =>
+      @timeout = setTimeout =>
+        @hide()
+      , 500
+
+    @events.push { type: 'mouseleave', fn: mouseleave }
 
     underhand.add_events @events, @container
 

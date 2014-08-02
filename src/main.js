@@ -1140,6 +1140,10 @@
         return;
       }
       this.message_stack || (this.message_stack = []);
+      if (opts.is_html) {
+        opts.html_content = msg;
+        opts.content = '';
+      }
       this.message_stack.push(new JRule.Messenger(underhand.extend({
         content: msg,
         is_flash: true
@@ -1188,13 +1192,16 @@
     }
 
     Messenger.prototype.setup_events = function() {
-      var onclick;
+      var mouseenter, mouseleave, onclick;
       this.events || (this.events = []);
       if (!this.container) {
         return;
       }
       onclick = (function(_this) {
         return function(e) {
+          if (e.target.tagName.toLowerCase() === "a") {
+            return true;
+          }
           e.preventDefault();
           return _this.hide();
         };
@@ -1202,6 +1209,28 @@
       this.events.push({
         type: 'click',
         fn: onclick
+      });
+      mouseenter = (function(_this) {
+        return function(e) {
+          if (_this.timeout) {
+            return clearTimeout(_this.timeout);
+          }
+        };
+      })(this);
+      this.events.push({
+        type: 'mouseenter',
+        fn: mouseenter
+      });
+      mouseleave = (function(_this) {
+        return function(e) {
+          return _this.timeout = setTimeout(function() {
+            return _this.hide();
+          }, 500);
+        };
+      })(this);
+      this.events.push({
+        type: 'mouseleave',
+        fn: mouseleave
       });
       return underhand.add_events(this.events, this.container);
     };
@@ -1493,7 +1522,10 @@
   document.JRule = JRule;
 
   ready = function() {
-    return document.jruler = new document.JRule();
+    document.jruler = new document.JRule();
+    return JRule.Messenger.alert("Hey! Thanks for using JRule, but the bookmarklet has been updated. You should revisit the <a style='color:#0cf;' target='_blank' href='http://beansandhops.com/jrule.html'>JRule page</a> and replace your Bookmarklet with the new one. This one will cease to be upgraded form here on. Thanks again!", {
+      is_html: true
+    });
   };
 
   if (document.readyState !== "complete") {
