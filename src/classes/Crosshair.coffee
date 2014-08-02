@@ -24,7 +24,7 @@ class JRule.Crosshair
     styles =
       position: "fixed"
       backgroundColor: "#{style.crosshairColor}"
-      zIndex: 4000
+      zIndex: JRule.zIndex
 
     crosshair.className = "crosshair"
 

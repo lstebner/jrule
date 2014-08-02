@@ -52,7 +52,7 @@ class JRule.BorderRulers
       styles = @get_style()
       underhand.extend styles,
         position: "fixed"
-        zIndex: 4000
+        zIndex: JRule.zIndex
 
       underhand.apply_styles rule, styles
 
@@ -172,7 +172,7 @@ class JRule.BorderRulers
       mouse_pos = document.createElement "div"
       style =
         position: "fixed"
-        zIndex: 5000
+        zIndex: JRule.zIndex + 1
         left: 0
         top: 0
         padding: "6px"

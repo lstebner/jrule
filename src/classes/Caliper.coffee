@@ -55,7 +55,7 @@ class JRule.Caliper
         height: "#{height}px"
         left: "#{x}px"
         top: "#{y}px"
-        zIndex: 5000
+        zIndex: JRule.zIndex
       underhand.apply_styles @indicator, indicator_style
 
       indicator_size_style =
@@ -89,7 +89,7 @@ class JRule.Caliper
       left: "#{@start_pos[0]}px"
       top: "#{@start_pos[1]}px"
       backgroundColor: "rgba(100, 100, 100, .4)"
-      zIndex: 3999
+      zIndex: JRule.zIndex
     @indicator = indicator
     underhand.apply_styles @indicator, i_style
     document.body.appendChild @indicator

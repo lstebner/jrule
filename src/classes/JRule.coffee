@@ -5,6 +5,8 @@
 
 class JRule
   @talkative: 1
+  @version: .5
+  @zIndex: 999999
 
   constructor: (@opts={}) ->
     @setup_border_rulers()
@@ -25,6 +27,7 @@ class JRule
     @border_rulers.destroy() if @border_rulers
     @grid.destroy() if @grid
     @mouse_tracker.destroy() if @mouse_tracker
+    @mandolin.destroy() if @mandolin
     document.jruler = undefined
 
     console?.log "Venni Vetti Vecci"

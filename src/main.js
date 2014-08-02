@@ -98,6 +98,10 @@
   JRule = (function() {
     JRule.talkative = 1;
 
+    JRule.version = .5;
+
+    JRule.zIndex = 999999;
+
     function JRule(opts) {
       this.opts = opts != null ? opts : {};
       this.setup_border_rulers();
@@ -127,6 +131,9 @@
       }
       if (this.mouse_tracker) {
         this.mouse_tracker.destroy();
+      }
+      if (this.mandolin) {
+        this.mandolin.destroy();
       }
       document.jruler = void 0;
       return typeof console !== "undefined" && console !== null ? console.log("Venni Vetti Vecci") : void 0;
@@ -278,7 +285,7 @@
           styles = _this.get_style();
           underhand.extend(styles, {
             position: "fixed",
-            zIndex: 4000
+            zIndex: JRule.zIndex
           });
           underhand.apply_styles(rule, styles);
           return rule;
@@ -419,7 +426,7 @@
         mouse_pos = document.createElement("div");
         style = {
           position: "fixed",
-          zIndex: 5000,
+          zIndex: JRule.zIndex + 1,
           left: 0,
           top: 0,
           padding: "6px",
@@ -589,7 +596,7 @@
           height: "" + height + "px",
           left: "" + x + "px",
           top: "" + y + "px",
-          zIndex: 5000
+          zIndex: JRule.zIndex
         };
         underhand.apply_styles(this.indicator, indicator_style);
         indicator_size_style = {
@@ -625,7 +632,7 @@
         left: "" + this.start_pos[0] + "px",
         top: "" + this.start_pos[1] + "px",
         backgroundColor: "rgba(100, 100, 100, .4)",
-        zIndex: 3999
+        zIndex: JRule.zIndex
       };
       this.indicator = indicator;
       underhand.apply_styles(this.indicator, i_style);
@@ -741,7 +748,7 @@
       styles = {
         position: "fixed",
         backgroundColor: "" + style.crosshairColor,
-        zIndex: 4000
+        zIndex: JRule.zIndex
       };
       crosshair.className = "crosshair";
       if (axis === "x" || axis === "horizontal") {
@@ -993,7 +1000,7 @@
     Mandolin.prototype.default_opts = function() {
       var defaults;
       defaults = {
-        snap: true,
+        snap: false,
         snap_to: 10,
         style: {
           sliceColor: "rgba(150, 150, 150, .5)"
@@ -1103,6 +1110,11 @@
         _results.push(s.style.display = "block");
       }
       return _results;
+    };
+
+    Mandolin.prototype.destroy = function() {
+      this.clear_slices();
+      return underhand.remove_events(this.events);
     };
 
     return Mandolin;
@@ -1221,7 +1233,7 @@
         backgroundColor: "rgba(0, 0, 0, .8)",
         color: "#fff",
         display: "none",
-        zIndex: 5000,
+        zIndex: JRule.zIndex + 10,
         fontSize: "14px",
         fontFamily: "sans-serif",
         borderRadius: "3px",

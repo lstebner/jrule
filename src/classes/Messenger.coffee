@@ -104,7 +104,7 @@ class JRule.Messenger
       backgroundColor: "rgba(0, 0, 0, .8)"
       color: "#fff"
       display: "none"
-      zIndex: 5000
+      zIndex: JRule.zIndex + 10
       fontSize: "14px"
       fontFamily: "sans-serif"
       borderRadius: "3px"
