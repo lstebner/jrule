@@ -13,6 +13,7 @@ class JRule.BorderRulers
   
     @default_opts()
     @setup_rulers()
+    @setup_mouse_pos()
     @setup_events()
     
   default_opts: ->
@@ -26,15 +27,25 @@ class JRule.BorderRulers
       left: true
       right: false
       bottom: false
-      tick_distance: 100 #px
+      tick_distance: 200 #px
       rule_size: 25
-      divisions: 8
+      divisions: 10
       show_mouse: true
       show_labels: true
       start_in_center: true
 
     #todo: actual extend of defaults with given @opts
     @opts = defaults
+
+  config: (what, value) ->
+    switch what
+      when 'divisions'
+        @opts.divisions = value
+
+      when 'tick_distance'
+        @opts.tick_distance = value
+
+    @setup_rulers(true)
 
   get_style: ->
     backgroundColor: @opts.style.backgroundColor
@@ -43,7 +54,7 @@ class JRule.BorderRulers
   setup_rulers: (force=false) ->
     return if @setup && !force
 
-    @destroy() if @setup && force
+    @destroy_rulers() if @setup && force
     
     create_ruler = =>
       rule = document.createElement("div")
@@ -157,6 +168,9 @@ class JRule.BorderRulers
           div_pos = j * division_distance + tick_pos
           @draw_tick side, div_pos, (if j % 2 then .3 else .5)
 
+  setup_mouse_pos: ->
+    doc_rect = document.body.getBoundingClientRect()
+
     if @opts.show_mouse
       if @rulers.hasOwnProperty 'top'
         mouse_x_tick = @create_tick 'top', Math.round(doc_rect.width / 2), 1
@@ -185,7 +199,6 @@ class JRule.BorderRulers
       @mouse_pos = mouse_pos
       document.body.appendChild @mouse_pos
 
-
   create_tick: (side, pos, height=1, style_overrides={}) ->
     new_tick = document.createElement("div")
     style = underhand.extend @tick_style(side), style_overrides
@@ -209,13 +222,16 @@ class JRule.BorderRulers
     else
       false
 
+  destroy_rulers: ->
+    for name, ruler of @rulers
+      document.body.removeChild ruler
+
   destroy: ->
     underhand.remove_events @events, document.body
 
     document.body.removeChild @mouse_pos
 
-    for name, ruler of @rulers
-      document.body.removeChild ruler
+    @destroy_rulers()
 
   render: ->
     if @opts.show_mouse
