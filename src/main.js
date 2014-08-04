@@ -214,6 +214,21 @@
       return JRule.Help.get().toggle();
     };
 
+    JRule.prototype.config = function(what, settings) {
+      if (settings == null) {
+        settings = {};
+      }
+      switch (what) {
+        case 'crosshairs':
+          if (settings.size) {
+            this.mouse_tracker.config('crosshair_size', settings.size);
+          }
+          if (settings.color) {
+            return this.mouse_tracker.config('crosshair_color', settings.color);
+          }
+      }
+    };
+
     return JRule;
 
   })();
@@ -1434,28 +1449,16 @@
     };
 
     MouseTracker.prototype.increase_crosshair_size = function() {
-      var _ref, _ref1;
       this.opts.style.crosshairThickness += 1;
-      if ((_ref = this.crosshairs.x) != null) {
-        _ref.style.width = "" + this.opts.style.crosshairThickness + "px";
-      }
-      if ((_ref1 = this.crosshairs.y) != null) {
-        _ref1.style.height = "" + this.opts.style.crosshairThickness + "px";
-      }
+      this.update();
       return JRule.Messenger.alert("" + this.opts.style.crosshairThickness + "px", {
         duration: 600
       });
     };
 
     MouseTracker.prototype.decrease_crosshair_size = function() {
-      var _ref, _ref1;
       this.opts.style.crosshairThickness = Math.max(1, this.opts.style.crosshairThickness - 1);
-      if ((_ref = this.crosshairs.x) != null) {
-        _ref.style.width = "" + this.opts.style.crosshairThickness + "px";
-      }
-      if ((_ref1 = this.crosshairs.y) != null) {
-        _ref1.style.height = "" + this.opts.style.crosshairThickness + "px";
-      }
+      this.update();
       return JRule.Messenger.alert("" + this.opts.style.crosshairThickness + "px", {
         duration: 600
       });
@@ -1508,6 +1511,31 @@
       return underhand.remove_events(this.events);
     };
 
+    MouseTracker.prototype.config = function(what, value) {
+      switch (what) {
+        case 'crosshair_size':
+          this.opts.style.crosshairThickness = Math.max(1, parseInt(value));
+          break;
+        case 'crosshair_color':
+          this.opts.style.crosshairColor = value;
+      }
+      this.update();
+      return this.render_crosshairs();
+    };
+
+    MouseTracker.prototype.update = function() {
+      var c, key, _ref, _ref1, _ref2;
+      _ref = this.crosshairs;
+      for (key in _ref) {
+        c = _ref[key];
+        c.style.backgroundColor = this.opts.style.crosshairColor;
+      }
+      if ((_ref1 = this.crosshairs.x) != null) {
+        _ref1.style.width = "" + this.opts.style.crosshairThickness + "px";
+      }
+      return (_ref2 = this.crosshairs.y) != null ? _ref2.style.height = "" + this.opts.style.crosshairThickness + "px" : void 0;
+    };
+
     return MouseTracker;
 
   })();
@@ -1522,10 +1550,7 @@
   document.JRule = JRule;
 
   ready = function() {
-    document.jruler = new document.JRule();
-    return JRule.Messenger.alert("Hey! Thanks for using JRule, but the bookmarklet has been updated. You should revisit the <a style='color:#0cf;' target='_blank' href='http://beansandhops.com/jrule.html'>JRule page</a> and replace your Bookmarklet with the new one. This one will cease to be upgraded form here on. Thanks again!", {
-      is_html: true
-    });
+    return document.jruler = new document.JRule();
   };
 
   if (document.readyState !== "complete") {

@@ -57,14 +57,12 @@ class JRule.MouseTracker
 
   increase_crosshair_size: ->
     @opts.style.crosshairThickness += 1
-    @crosshairs.x?.style.width = "#{@opts.style.crosshairThickness}px"
-    @crosshairs.y?.style.height = "#{@opts.style.crosshairThickness}px"
+    @update()
     JRule.Messenger.alert "#{@opts.style.crosshairThickness}px", { duration: 600 }
 
   decrease_crosshair_size: ->
     @opts.style.crosshairThickness = Math.max 1, @opts.style.crosshairThickness - 1
-    @crosshairs.x?.style.width = "#{@opts.style.crosshairThickness}px"
-    @crosshairs.y?.style.height = "#{@opts.style.crosshairThickness}px"
+    @update()
     JRule.Messenger.alert "#{@opts.style.crosshairThickness}px", { duration: 600 }
 
   setup_crosshairs: ->
@@ -97,6 +95,24 @@ class JRule.MouseTracker
   destroy: ->
     @remove_crosshairs()
     underhand.remove_events @events
+
+  config: (what, value) ->
+    switch what
+      when 'crosshair_size'
+        @opts.style.crosshairThickness = Math.max 1, parseInt(value)
+
+      when 'crosshair_color'
+        @opts.style.crosshairColor = value
+
+    @update()
+    @render_crosshairs()
+
+  update: ->
+    for key, c of @crosshairs
+      c.style.backgroundColor = @opts.style.crosshairColor
+
+    @crosshairs.x?.style.width = "#{@opts.style.crosshairThickness}px"
+    @crosshairs.y?.style.height = "#{@opts.style.crosshairThickness}px"
 
 
       

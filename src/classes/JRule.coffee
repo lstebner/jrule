@@ -81,3 +81,22 @@ class JRule
 
   toggle_help: ->
     JRule.Help.get().toggle()
+
+  config: (what, settings={}) ->
+    switch what
+      when 'crosshairs'
+        if settings.size
+          @mouse_tracker.config 'crosshair_size', settings.size
+
+        if settings.color
+          @mouse_tracker.config 'crosshair_color', settings.color
+
+
+
+
+
+
+
+
+
+
