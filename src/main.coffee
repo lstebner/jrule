@@ -3,6 +3,7 @@
 # @codekit-prepend "classes/JRule.coffee"
 
 
+# @codekit-prepend "classes/ColorWheel.coffee"
 # @codekit-prepend "classes/BorderRulers.coffee"
 # @codekit-prepend "classes/Caliper.coffee"
 # @codekit-prepend "classes/Crosshair.coffee"
