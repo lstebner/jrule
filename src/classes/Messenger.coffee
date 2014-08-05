@@ -16,19 +16,38 @@
 # author: lstebner
 
 class JRule.Messenger
-  @alert: (msg, opts={}) ->
+  @notify: (msg, opts={}) ->
     return if !JRule.talkative && !opts.force
-
-    @message_stack ||= []
 
     if opts.is_html
       opts.html_content = msg
       opts.content = ''
 
-    @message_stack.push new JRule.Messenger underhand.extend
+    msg = new JRule.Messenger.Notification underhand.extend
       content: msg
       is_flash: true
     , opts
+
+    @add_message_to_stack msg
+
+  @flash: (msg, opts={}) ->
+    return if !JRule.talkative && !opts.force
+
+    if opts.is_html
+      opts.html_content = msg
+      opts.content = ''
+
+    msg = new JRule.Messenger.Flash underhand.extend
+      content: msg
+      is_flash: true
+    , opts
+
+    @add_message_to_stack msg
+
+  @add_message_to_stack: (msg) ->
+    @message_stack ||= []
+
+    @message_stack.push msg
 
     #if there is more than one message in the stack then we will literally stack them
     #up so they aren't overlapping
@@ -63,12 +82,8 @@ class JRule.Messenger
 
     @message_stack = copy
 
-  constructor: (@opts={}) ->
-    @container = null
-    @default_opts()
-    @create()
-    @setup_events()
-
+# generic message class, inherited by specific message types
+class JRule.Messenger.Message extends JRule.GUIObject
   setup_events: ->
     @events ||= []
 
@@ -110,43 +125,30 @@ class JRule.Messenger
 
     @opts = underhand.defaults defaults, @opts
 
-  create: ->
-    d = document.createElement "div"
-    d.className = "message #{@opts.type}"
+  classes: ->
+    ["message", @opts.type]
 
+  style: ->
     style =
-      position: "fixed"
-      top: "36px"
-      right: "10px"
-      padding: "8px 12px"
-      backgroundColor: "rgba(0, 0, 0, .8)"
-      color: "#fff"
       display: "none"
-      zIndex: JRule.zIndex + 10
-      fontSize: "14px"
-      fontFamily: "sans-serif"
-      borderRadius: "3px"
-      maxWidth: "300px"
-      cursor: "pointer"
 
     if @opts.colors.hasOwnProperty @opts.type
       style.backgroundColor = @opts.colors[@opts.type]
 
-    underhand.apply_styles d, style
-    if @opts.html_content
-      d.innerHTML = @opts.html_content
-    else
-      underhand.set_text d, @opts.content
+    underhand.extend super(), style
 
-    @container = d
-    document.body.appendChild @container
+  create: ->
+    super
+
+    if @opts.html_content
+      @container.innerHTML = @opts.html_content
+    else
+      underhand.set_text @container, @opts.content
 
     @show() if @opts.show
 
   show: ->
-    @create() if !@container
-    @container.style.display = "block"
-    @visible = true
+    super
 
     if @opts.duration
       @timeout = setTimeout =>
@@ -154,16 +156,46 @@ class JRule.Messenger
       , @opts.duration
 
   hide: ->
-    @visible = false
-    @container.style.display = "none"
-    clearTimeout(@timeout) if @timeout
+    super
 
+    clearTimeout(@timeout) if @timeout
     @destroy() if @opts.is_flash
 
-  toggle: ->
-    if @visible then @hide() else @show()
+# top right corner notification bubble
+class JRule.Messenger.Notification extends JRule.Messenger.Message
+  style: ->
+    style = 
+      top: "36px"
+      right: "10px"
+      display: "none"
+      borderRadius: "3px"
+      minWidth: "200px"
+      maxWidth: "300px"
+      textAlign: "left"
 
-  destroy: ->
-    document.body.removeChild @container
-    @destroyed = true
-    underhand.remove_events @events, @container
+    underhand.extend super(), style
+
+# top flash message which spans entire width
+class JRule.Messenger.Flash extends JRule.Messenger.Message
+  style: ->
+    underhand.extend(
+      super
+      {
+        top: 0
+        left: 0
+        right: 0
+        textAlign: "center"
+        fontSize: "18px"
+        padding: "12px"
+        backgroundColor: "#333"
+      }
+    )
+
+  default_opts: ->
+    @opts = underhand.extend(
+      super,
+      {
+        is_flash: true
+        duration: 3000
+      }
+    )

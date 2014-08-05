@@ -8,6 +8,7 @@ class JRule.GUIObject
   destroy: ->
     underhand.remove_events @events
     document.body.removeChild @container
+    @destroyed = true
 
   default_opts: ->
 
@@ -31,15 +32,24 @@ class JRule.GUIObject
     {
       position: "fixed"
       backgroundColor: "rgba(0, 0, 0, .6)"
-      padding: "18px"
+      padding: "8px 12px"
       fontSize: "14px"
+      fontFamily: "sans-serif"
+      color: "#fff"
+      cursor: "pointer"
+      zIndex: JRule.zIndex + 10
     }
 
   show: ->
     @container.style.display = "block"
+    @visible = true
 
   hide: ->
     @container.style.display = "none"
+    @visible = false
+
+  toggle: ->
+    if @visible then @hide() else @show()
 
 
 
