@@ -96,6 +96,9 @@ class JRule.MouseTracker
     @remove_crosshairs()
     underhand.remove_events @events
 
+  config_items: ->
+    ['crosshair_size', 'crosshair_color']
+
   config: (what, value) ->
     switch what
       when 'crosshair_size'

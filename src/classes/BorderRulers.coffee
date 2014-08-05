@@ -19,9 +19,9 @@ class JRule.BorderRulers
   default_opts: ->
     defaults =
       style:
-        backgroundColor: "#aaa"
+        backgroundColor: "rgba(#{JRule.ColorWheel.hex_to_rgba('#aaa', .5)})"
         opacity: .5
-        tickColor: "#ccc"
+        tickColor: "#f8f8f8"
         mouseTickColor: "#00f"
       top: true
       left: true
@@ -37,6 +37,9 @@ class JRule.BorderRulers
     #todo: actual extend of defaults with given @opts
     @opts = defaults
 
+  config_items: ->
+    ['divisions', 'tick_distance', 'show_mouse', 'show_labels']
+
   config: (what, value) ->
     switch what
       when 'divisions'
@@ -44,6 +47,12 @@ class JRule.BorderRulers
 
       when 'tick_distance'
         @opts.tick_distance = value
+
+      when 'show_mouse'
+        @opts.show_mosue = value
+
+      when 'show_labels'
+        @opts.show_labels = value
 
     @setup_rulers(true)
 
@@ -164,7 +173,7 @@ class JRule.BorderRulers
           tick_label = @create_label side, tick_pos
           @rulers[side].appendChild tick_label
 
-        for j in [1...@opts.divisions]
+        for j in [1..@opts.divisions]
           div_pos = j * division_distance + tick_pos
           @draw_tick side, div_pos, (if j % 2 then .3 else .5)
 

@@ -83,21 +83,16 @@ class JRule
     JRule.Help.get().toggle()
 
   config: (what, settings={}) ->
-    switch what
-      when 'crosshairs'
-        if settings.size
-          @mouse_tracker.config 'crosshair_size', settings.size
+    options = if what == 'crosshairs'
+      @mouse_tracker.config_items()
+    else if what == 'rulers'
+      @border_rulers.config_items()
 
-        if settings.color
-          @mouse_tracker.config 'crosshair_color', settings.color
-
-      when 'rulers'
-        if settings.divisions
-          @border_rulers.config 'divisions', settings.divisions
-
-        if settings.tick_distance
-          @border_rulers.config 'tick_distance', settings.tick_distance
-
+    for key, val of settings
+      if options.indexOf(key) > -1
+        switch what
+          when 'crosshairs' then @mouse_tracker.config key, val
+          when 'rulers' then @border_rulers.config key, val
 
 
 

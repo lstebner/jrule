@@ -215,29 +215,112 @@
     };
 
     JRule.prototype.config = function(what, settings) {
+      var key, options, val, _results;
       if (settings == null) {
         settings = {};
       }
-      switch (what) {
-        case 'crosshairs':
-          if (settings.size) {
-            this.mouse_tracker.config('crosshair_size', settings.size);
+      options = what === 'crosshairs' ? this.mouse_tracker.config_items() : what === 'rulers' ? this.border_rulers.config_items() : void 0;
+      _results = [];
+      for (key in settings) {
+        val = settings[key];
+        if (options.indexOf(key) > -1) {
+          switch (what) {
+            case 'crosshairs':
+              _results.push(this.mouse_tracker.config(key, val));
+              break;
+            case 'rulers':
+              _results.push(this.border_rulers.config(key, val));
+              break;
+            default:
+              _results.push(void 0);
           }
-          if (settings.color) {
-            return this.mouse_tracker.config('crosshair_color', settings.color);
-          }
-          break;
-        case 'rulers':
-          if (settings.divisions) {
-            this.border_rulers.config('divisions', settings.divisions);
-          }
-          if (settings.tick_distance) {
-            return this.border_rulers.config('tick_distance', settings.tick_distance);
-          }
+        } else {
+          _results.push(void 0);
+        }
       }
+      return _results;
     };
 
     return JRule;
+
+  })();
+
+
+  /*
+  --------------------------------------------
+       Begin ColorWheel.coffee
+  --------------------------------------------
+   */
+
+  JRule.ColorWheel = (function() {
+    function ColorWheel() {}
+
+    ColorWheel.rgb_string_to_hex = function(rgb) {
+      var i, p, pieces, _i, _len;
+      if (rgb == null) {
+        rgb = "255, 255, 255";
+      }
+      pieces = rgb.split(',');
+      rgb = [];
+      for (i = _i = 0, _len = pieces.length; _i < _len; i = ++_i) {
+        p = pieces[i];
+        rgb[i] = parseInt(p);
+      }
+      return this.rgb_to_hex(rgb[0], rgb[1], rgb[2]);
+    };
+
+    ColorWheel.rgb_to_hex = function(r, g, b) {
+      var convert, hex;
+      if (r == null) {
+        r = 0;
+      }
+      if (g == null) {
+        g = 0;
+      }
+      if (b == null) {
+        b = 0;
+      }
+      convert = function(i) {
+        i = i.toString(16);
+        if (i.length === 1) {
+          i = "0" + i;
+        }
+        return i;
+      };
+      return hex = "" + (convert(r)) + (convert(g)) + (convert(b));
+    };
+
+    ColorWheel.hex_to_rgb = function(hex) {
+      var b, char, g, proper_hex, r, rgb, _i, _len;
+      if (hex == null) {
+        hex = "ffffff";
+      }
+      hex = hex.replace("#", "");
+      proper_hex = hex;
+      if (hex.length === 3) {
+        proper_hex = "";
+        for (_i = 0, _len = hex.length; _i < _len; _i++) {
+          char = hex[_i];
+          proper_hex += char + char;
+        }
+      }
+      r = proper_hex.substr(0, 2);
+      g = proper_hex.substr(2, 2);
+      b = proper_hex.substr(4, 2);
+      return rgb = "" + (parseInt(r, 16)) + ", " + (parseInt(g, 16)) + ", " + (parseInt(b, 16));
+    };
+
+    ColorWheel.hex_to_rgba = function(hex, a) {
+      if (hex == null) {
+        hex = "fff";
+      }
+      if (a == null) {
+        a = 1;
+      }
+      return this.hex_to_rgb(hex) + (", " + a);
+    };
+
+    return ColorWheel;
 
   })();
 
@@ -264,9 +347,9 @@
       var defaults;
       defaults = {
         style: {
-          backgroundColor: "#aaa",
+          backgroundColor: "rgba(" + (JRule.ColorWheel.hex_to_rgba('#aaa', .5)) + ")",
           opacity: .5,
-          tickColor: "#ccc",
+          tickColor: "#f8f8f8",
           mouseTickColor: "#00f"
         },
         top: true,
@@ -283,6 +366,10 @@
       return this.opts = defaults;
     };
 
+    BorderRulers.prototype.config_items = function() {
+      return ['divisions', 'tick_distance', 'show_mouse', 'show_labels'];
+    };
+
     BorderRulers.prototype.config = function(what, value) {
       switch (what) {
         case 'divisions':
@@ -290,6 +377,12 @@
           break;
         case 'tick_distance':
           this.opts.tick_distance = value;
+          break;
+        case 'show_mouse':
+          this.opts.show_mosue = value;
+          break;
+        case 'show_labels':
+          this.opts.show_labels = value;
       }
       return this.setup_rulers(true);
     };
@@ -446,7 +539,7 @@
             _results1.push((function() {
               var _k, _ref1, _results2;
               _results2 = [];
-              for (j = _k = 1, _ref1 = this.opts.divisions; 1 <= _ref1 ? _k < _ref1 : _k > _ref1; j = 1 <= _ref1 ? ++_k : --_k) {
+              for (j = _k = 1, _ref1 = this.opts.divisions; 1 <= _ref1 ? _k <= _ref1 : _k >= _ref1; j = 1 <= _ref1 ? ++_k : --_k) {
                 div_pos = j * division_distance + tick_pos;
                 _results2.push(this.draw_tick(side, div_pos, (j % 2 ? .3 : .5)));
               }
@@ -1550,6 +1643,10 @@
     MouseTracker.prototype.destroy = function() {
       this.remove_crosshairs();
       return underhand.remove_events(this.events);
+    };
+
+    MouseTracker.prototype.config_items = function() {
+      return ['crosshair_size', 'crosshair_color'];
     };
 
     MouseTracker.prototype.config = function(what, value) {
