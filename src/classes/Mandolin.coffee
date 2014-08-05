@@ -59,7 +59,7 @@ class JRule.Mandolin
       backgroundColor: @opts.style.sliceColor
     }
 
-    JRule.Messenger.alert "Slice created at #{pos}px"
+    JRule.Messenger.notify "Slice created at #{pos}px"
 
     document.body.appendChild slice
     @slices.push slice
@@ -71,7 +71,7 @@ class JRule.Mandolin
       backgroundColor: @opts.style.sliceColor
     }
 
-    JRule.Messenger.alert "Divide created at #{pos}px"
+    JRule.Messenger.notify "Divide created at #{pos}px"
 
     document.body.appendChild slice
     @slices.push slice

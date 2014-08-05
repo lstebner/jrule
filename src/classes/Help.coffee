@@ -6,7 +6,7 @@
 #
 # author: lstebner
 
-class JRule.Help extends JRule.Messenger
+class JRule.Help extends JRule.Messenger.Notification
   @get: ->
     @help ||= new JRule.Help()
 

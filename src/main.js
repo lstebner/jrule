@@ -113,8 +113,8 @@
       if (typeof console !== "undefined" && console !== null) {
         console.log('jrule ready!');
       }
-      JRule.Messenger.alert('jrule ready!');
-      JRule.Messenger.alert('Press "h" to view help');
+      JRule.Messenger.notify('jrule ready!');
+      JRule.Messenger.notify('Press "h" to view help');
     }
 
     JRule.prototype.default_opts = function() {};
@@ -154,7 +154,7 @@
             return _this.toggle_help();
           } else if (e.keyCode === 77) {
             JRule.talkative = !JRule.talkative;
-            return JRule.Messenger.alert("Messages " + (JRule.talkative ? 'on' : 'off'), {
+            return JRule.Messenger.notify("Messages " + (JRule.talkative ? 'on' : 'off'), {
               duration: 1000,
               force: true
             });
@@ -189,7 +189,7 @@
     JRule.prototype.toggle_crosshairs = function() {
       var shown;
       shown = this.mouse_tracker.toggle_crosshairs();
-      return JRule.Messenger.alert("Crosshairs " + (shown ? 'on' : 'off'), {
+      return JRule.Messenger.notify("Crosshairs " + (shown ? 'on' : 'off'), {
         duration: 1000
       });
     };
@@ -197,7 +197,7 @@
     JRule.prototype.toggle_rulers = function() {
       var shown;
       shown = this.border_rulers.toggle_visibility();
-      return JRule.Messenger.alert("Rulers " + (shown ? 'on' : 'off'), {
+      return JRule.Messenger.notify("Rulers " + (shown ? 'on' : 'off'), {
         duration: 1000
       });
     };
@@ -205,7 +205,7 @@
     JRule.prototype.toggle_grid = function() {
       var shown;
       shown = this.grid.toggle_grid();
-      return JRule.Messenger.alert("Grid " + (shown ? 'on' : 'off'), {
+      return JRule.Messenger.notify("Grid " + (shown ? 'on' : 'off'), {
         duration: 1000
       });
     };
@@ -242,6 +242,82 @@
     };
 
     return JRule;
+
+  })();
+
+
+  /*
+  --------------------------------------------
+       Begin GUIObject.coffee
+  --------------------------------------------
+   */
+
+  JRule.GUIObject = (function() {
+    function GUIObject(opts) {
+      this.opts = opts != null ? opts : {};
+      this.default_opts();
+      this.create();
+      this.setup_events();
+    }
+
+    GUIObject.prototype.destroy = function() {
+      underhand.remove_events(this.events);
+      document.body.removeChild(this.container);
+      return this.destroyed = true;
+    };
+
+    GUIObject.prototype.default_opts = function() {};
+
+    GUIObject.prototype.setup_events = function() {
+      this.events || (this.events = []);
+      return underhand.add_events(this.events, this.container);
+    };
+
+    GUIObject.prototype.classes = function() {
+      return [];
+    };
+
+    GUIObject.prototype.create = function() {
+      var d;
+      d = document.createElement("div");
+      d.className = this.classes().join(' ');
+      this.container = d;
+      document.body.appendChild(this.container);
+      return underhand.apply_styles(this.container, this.style());
+    };
+
+    GUIObject.prototype.style = function() {
+      return {
+        position: "fixed",
+        backgroundColor: "rgba(0, 0, 0, .6)",
+        padding: "8px 12px",
+        fontSize: "14px",
+        fontFamily: "sans-serif",
+        color: "#fff",
+        cursor: "pointer",
+        zIndex: JRule.zIndex + 10
+      };
+    };
+
+    GUIObject.prototype.show = function() {
+      this.container.style.display = "block";
+      return this.visible = true;
+    };
+
+    GUIObject.prototype.hide = function() {
+      this.container.style.display = "none";
+      return this.visible = false;
+    };
+
+    GUIObject.prototype.toggle = function() {
+      if (this.visible) {
+        return this.hide();
+      } else {
+        return this.show();
+      }
+    };
+
+    return GUIObject;
 
   })();
 
@@ -700,7 +776,7 @@
               _this.measuring = false;
               _this.end_pos = [_this.mouse_tracker.mousex, _this.mouse_tracker.mousey];
               _this.last_size = [Math.abs(_this.end_pos[0] - _this.start_pos[0]), Math.abs(_this.end_pos[1] - _this.start_pos[1])];
-              JRule.Messenger.alert("" + _this.last_size[0] + "x" + _this.last_size[1]);
+              JRule.Messenger.notify("" + _this.last_size[0] + "x" + _this.last_size[1]);
               document.removeEventListener('keyup', keyup_fn);
               return _this.cleanup();
             };
@@ -1205,7 +1281,7 @@
       slice = JRule.Crosshair.create('x', "" + pos + "px", {
         backgroundColor: this.opts.style.sliceColor
       });
-      JRule.Messenger.alert("Slice created at " + pos + "px");
+      JRule.Messenger.notify("Slice created at " + pos + "px");
       document.body.appendChild(slice);
       return this.slices.push(slice);
     };
@@ -1218,7 +1294,7 @@
       slice = JRule.Crosshair.create('y', "" + pos + "px", {
         backgroundColor: this.opts.style.sliceColor
       });
-      JRule.Messenger.alert("Divide created at " + pos + "px");
+      JRule.Messenger.notify("Divide created at " + pos + "px");
       document.body.appendChild(slice);
       return this.slices.push(slice);
     };
@@ -1280,23 +1356,48 @@
    */
 
   JRule.Messenger = (function() {
-    Messenger.alert = function(msg, opts) {
-      var i, m, request_cleanup, y, _i, _len, _ref;
+    function Messenger() {}
+
+    Messenger.notify = function(msg, opts) {
       if (opts == null) {
         opts = {};
       }
       if (!JRule.talkative && !opts.force) {
         return;
       }
-      this.message_stack || (this.message_stack = []);
       if (opts.is_html) {
         opts.html_content = msg;
         opts.content = '';
       }
-      this.message_stack.push(new JRule.Messenger(underhand.extend({
+      msg = new JRule.Messenger.Notification(underhand.extend({
         content: msg,
         is_flash: true
-      }, opts)));
+      }, opts));
+      return this.add_message_to_stack(msg);
+    };
+
+    Messenger.flash = function(msg, opts) {
+      if (opts == null) {
+        opts = {};
+      }
+      if (!JRule.talkative && !opts.force) {
+        return;
+      }
+      if (opts.is_html) {
+        opts.html_content = msg;
+        opts.content = '';
+      }
+      msg = new JRule.Messenger.Flash(underhand.extend({
+        content: msg,
+        is_flash: true
+      }, opts));
+      return this.add_message_to_stack(msg);
+    };
+
+    Messenger.add_message_to_stack = function(msg) {
+      var i, m, request_cleanup, y, _i, _len, _ref;
+      this.message_stack || (this.message_stack = []);
+      this.message_stack.push(msg);
       if (this.message_stack.length > 1) {
         y = 36;
         request_cleanup = false;
@@ -1332,15 +1433,18 @@
       return this.message_stack = copy;
     };
 
-    function Messenger(opts) {
-      this.opts = opts != null ? opts : {};
-      this.container = null;
-      this.default_opts();
-      this.create();
-      this.setup_events();
+    return Messenger;
+
+  })();
+
+  JRule.Messenger.Message = (function(_super) {
+    __extends(Message, _super);
+
+    function Message() {
+      return Message.__super__.constructor.apply(this, arguments);
     }
 
-    Messenger.prototype.setup_events = function() {
+    Message.prototype.setup_events = function() {
       var mouseenter, mouseleave, onclick;
       this.events || (this.events = []);
       if (!this.container) {
@@ -1384,7 +1488,7 @@
       return underhand.add_events(this.events, this.container);
     };
 
-    Messenger.prototype.default_opts = function() {
+    Message.prototype.default_opts = function() {
       var defaults;
       defaults = {
         content: '',
@@ -1401,47 +1505,35 @@
       return this.opts = underhand.defaults(defaults, this.opts);
     };
 
-    Messenger.prototype.create = function() {
-      var d, style;
-      d = document.createElement("div");
-      d.className = "message " + this.opts.type;
+    Message.prototype.classes = function() {
+      return ["message", this.opts.type];
+    };
+
+    Message.prototype.style = function() {
+      var style;
       style = {
-        position: "fixed",
-        top: "36px",
-        right: "10px",
-        padding: "8px 12px",
-        backgroundColor: "rgba(0, 0, 0, .8)",
-        color: "#fff",
-        display: "none",
-        zIndex: JRule.zIndex + 10,
-        fontSize: "14px",
-        fontFamily: "sans-serif",
-        borderRadius: "3px",
-        maxWidth: "300px",
-        cursor: "pointer"
+        display: "none"
       };
       if (this.opts.colors.hasOwnProperty(this.opts.type)) {
         style.backgroundColor = this.opts.colors[this.opts.type];
       }
-      underhand.apply_styles(d, style);
+      return underhand.extend(Message.__super__.style.call(this), style);
+    };
+
+    Message.prototype.create = function() {
+      Message.__super__.create.apply(this, arguments);
       if (this.opts.html_content) {
-        d.innerHTML = this.opts.html_content;
+        this.container.innerHTML = this.opts.html_content;
       } else {
-        underhand.set_text(d, this.opts.content);
+        underhand.set_text(this.container, this.opts.content);
       }
-      this.container = d;
-      document.body.appendChild(this.container);
       if (this.opts.show) {
         return this.show();
       }
     };
 
-    Messenger.prototype.show = function() {
-      if (!this.container) {
-        this.create();
-      }
-      this.container.style.display = "block";
-      this.visible = true;
+    Message.prototype.show = function() {
+      Message.__super__.show.apply(this, arguments);
       if (this.opts.duration) {
         return this.timeout = setTimeout((function(_this) {
           return function() {
@@ -1451,9 +1543,8 @@
       }
     };
 
-    Messenger.prototype.hide = function() {
-      this.visible = false;
-      this.container.style.display = "none";
+    Message.prototype.hide = function() {
+      Message.__super__.hide.apply(this, arguments);
       if (this.timeout) {
         clearTimeout(this.timeout);
       }
@@ -1462,23 +1553,64 @@
       }
     };
 
-    Messenger.prototype.toggle = function() {
-      if (this.visible) {
-        return this.hide();
-      } else {
-        return this.show();
-      }
+    return Message;
+
+  })(JRule.GUIObject);
+
+  JRule.Messenger.Notification = (function(_super) {
+    __extends(Notification, _super);
+
+    function Notification() {
+      return Notification.__super__.constructor.apply(this, arguments);
+    }
+
+    Notification.prototype.style = function() {
+      var style;
+      style = {
+        top: "36px",
+        right: "10px",
+        display: "none",
+        borderRadius: "3px",
+        minWidth: "200px",
+        maxWidth: "300px",
+        textAlign: "left"
+      };
+      return underhand.extend(Notification.__super__.style.call(this), style);
     };
 
-    Messenger.prototype.destroy = function() {
-      document.body.removeChild(this.container);
-      this.destroyed = true;
-      return underhand.remove_events(this.events, this.container);
+    return Notification;
+
+  })(JRule.Messenger.Message);
+
+  JRule.Messenger.Flash = (function(_super) {
+    __extends(Flash, _super);
+
+    function Flash() {
+      return Flash.__super__.constructor.apply(this, arguments);
+    }
+
+    Flash.prototype.style = function() {
+      return underhand.extend(Flash.__super__.style.apply(this, arguments), {
+        top: 0,
+        left: 0,
+        right: 0,
+        textAlign: "center",
+        fontSize: "18px",
+        padding: "12px",
+        backgroundColor: "#333"
+      });
     };
 
-    return Messenger;
+    Flash.prototype.default_opts = function() {
+      return this.opts = underhand.extend(Flash.__super__.default_opts.apply(this, arguments), {
+        is_flash: true,
+        duration: 3000
+      });
+    };
 
-  })();
+    return Flash;
+
+  })(JRule.Messenger.Message);
 
 
   /*
@@ -1511,7 +1643,7 @@
 
     return Help;
 
-  })(JRule.Messenger);
+  })(JRule.Messenger.Notification);
 
 
   /*
@@ -1585,7 +1717,7 @@
     MouseTracker.prototype.increase_crosshair_size = function() {
       this.opts.style.crosshairThickness += 1;
       this.update();
-      return JRule.Messenger.alert("" + this.opts.style.crosshairThickness + "px", {
+      return JRule.Messenger.notify("" + this.opts.style.crosshairThickness + "px", {
         duration: 600
       });
     };
@@ -1593,7 +1725,7 @@
     MouseTracker.prototype.decrease_crosshair_size = function() {
       this.opts.style.crosshairThickness = Math.max(1, this.opts.style.crosshairThickness - 1);
       this.update();
-      return JRule.Messenger.alert("" + this.opts.style.crosshairThickness + "px", {
+      return JRule.Messenger.notify("" + this.opts.style.crosshairThickness + "px", {
         duration: 600
       });
     };

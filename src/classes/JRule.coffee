@@ -17,8 +17,8 @@ class JRule
     @setup_events()
 
     console?.log 'jrule ready!'
-    JRule.Messenger.alert 'jrule ready!'
-    JRule.Messenger.alert 'Press "h" to view help'
+    JRule.Messenger.notify 'jrule ready!'
+    JRule.Messenger.notify 'Press "h" to view help'
 
   default_opts: ->
 
@@ -47,7 +47,7 @@ class JRule
         @toggle_help()
       else if e.keyCode == 77 #m
         JRule.talkative = !JRule.talkative
-        JRule.Messenger.alert "Messages #{if JRule.talkative then 'on' else 'off'}", { duration: 1000, force: true }
+        JRule.Messenger.notify "Messages #{if JRule.talkative then 'on' else 'off'}", { duration: 1000, force: true }
       else if e.keyCode == 27 #esc
         @destroy()
 
@@ -69,15 +69,15 @@ class JRule
 
   toggle_crosshairs: ->
     shown = @mouse_tracker.toggle_crosshairs()
-    JRule.Messenger.alert "Crosshairs #{if shown then 'on' else 'off'}", { duration: 1000 }
+    JRule.Messenger.notify "Crosshairs #{if shown then 'on' else 'off'}", { duration: 1000 }
 
   toggle_rulers: ->
     shown = @border_rulers.toggle_visibility()
-    JRule.Messenger.alert "Rulers #{if shown then 'on' else 'off'}", { duration: 1000 }
+    JRule.Messenger.notify "Rulers #{if shown then 'on' else 'off'}", { duration: 1000 }
 
   toggle_grid: ->
     shown = @grid.toggle_grid()
-    JRule.Messenger.alert "Grid #{if shown then 'on' else 'off'}", { duration: 1000 }
+    JRule.Messenger.notify "Grid #{if shown then 'on' else 'off'}", { duration: 1000 }
 
   toggle_help: ->
     JRule.Help.get().toggle()

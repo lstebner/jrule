@@ -58,12 +58,12 @@ class JRule.MouseTracker
   increase_crosshair_size: ->
     @opts.style.crosshairThickness += 1
     @update()
-    JRule.Messenger.alert "#{@opts.style.crosshairThickness}px", { duration: 600 }
+    JRule.Messenger.notify "#{@opts.style.crosshairThickness}px", { duration: 600 }
 
   decrease_crosshair_size: ->
     @opts.style.crosshairThickness = Math.max 1, @opts.style.crosshairThickness - 1
     @update()
-    JRule.Messenger.alert "#{@opts.style.crosshairThickness}px", { duration: 600 }
+    JRule.Messenger.notify "#{@opts.style.crosshairThickness}px", { duration: 600 }
 
   setup_crosshairs: ->
     @crosshairs = {}
