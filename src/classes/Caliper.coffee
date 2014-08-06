@@ -42,6 +42,7 @@ class JRule.Caliper
         document.addEventListener 'keyup', keyup_fn
 
       else if e.keyCode == 32 && @measuring
+        e.preventDefault()
         done()
         @draw_box [@start_pos, @end_pos]
         console.log "new box!", @start_pos, @end_pos
@@ -106,7 +107,7 @@ class JRule.Caliper
       underhand.set_text @indicator_size, "#{width}, #{height}"
 
   #expects box to be an array of [start, end] where each are [x, y] coordinates
-  draw_box: (box) ->
+  draw_box: (box, include_size=true) ->
     x = Math.min(box[0][0], box[1][0])
     y = Math.min(box[0][1], box[1][1])
     width = Math.abs box[0][0] - box[1][0] # Math.max(box[0][0], box[1][0]) -  Math.min(box[0][0], box[0][1])
@@ -116,6 +117,22 @@ class JRule.Caliper
     document.body.appendChild new_box
     @boxes.push new_box 
     @boxes[@boxes.length - 1].dataset.index = @boxes.length - 1
+
+    if include_size
+      size = document.createElement "div"
+      size.className = "size_indicator"
+      style =
+        position: "absolute"
+        top: "50%"
+        fontSize: "16px"
+        fontFamily: "sans-serif"
+        color: "#fafafa"
+        textAlign: "center"
+        width: "100%"
+      underhand.apply_styles size, style
+      underhand.set_text size, "#{width}x#{height}"
+      new_box.appendChild size
+
 
   create_box: (x, y, width, height) ->
     box = document.createElement "div"

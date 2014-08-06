@@ -793,6 +793,7 @@
             _this.setup_indicators();
             return document.addEventListener('keyup', keyup_fn);
           } else if (e.keyCode === 32 && _this.measuring) {
+            e.preventDefault();
             done();
             _this.draw_box([_this.start_pos, _this.end_pos]);
             return console.log("new box!", _this.start_pos, _this.end_pos);
@@ -873,8 +874,11 @@
       }
     };
 
-    Caliper.prototype.draw_box = function(box) {
-      var height, new_box, width, x, y;
+    Caliper.prototype.draw_box = function(box, include_size) {
+      var height, new_box, size, style, width, x, y;
+      if (include_size == null) {
+        include_size = true;
+      }
       x = Math.min(box[0][0], box[1][0]);
       y = Math.min(box[0][1], box[1][1]);
       width = Math.abs(box[0][0] - box[1][0]);
@@ -883,7 +887,23 @@
       console.log(new_box);
       document.body.appendChild(new_box);
       this.boxes.push(new_box);
-      return this.boxes[this.boxes.length - 1].dataset.index = this.boxes.length - 1;
+      this.boxes[this.boxes.length - 1].dataset.index = this.boxes.length - 1;
+      if (include_size) {
+        size = document.createElement("div");
+        size.className = "size_indicator";
+        style = {
+          position: "absolute",
+          top: "50%",
+          fontSize: "16px",
+          fontFamily: "sans-serif",
+          color: "#fafafa",
+          textAlign: "center",
+          width: "100%"
+        };
+        underhand.apply_styles(size, style);
+        underhand.set_text(size, "" + width + "x" + height);
+        return new_box.appendChild(size);
+      }
     };
 
     Caliper.prototype.create_box = function(x, y, width, height) {
