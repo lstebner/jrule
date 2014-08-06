@@ -21,6 +21,7 @@ class JRule.Help extends JRule.Messenger.Notification
       Press 'r' to toggle the Rulers<br>
       Hold 'shift' and move the mouse to Measure<br>
       Press 'h' to see this message again<br>
+      Press 'm' to toggle messages on/off
       Click this message to get rid of it<br>
       Press 'escape' to remove JRule when you're done<br>
     "
