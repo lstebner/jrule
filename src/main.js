@@ -241,6 +241,13 @@
       return _results;
     };
 
+    JRule.prototype.config_items = function() {
+      var crosshair_items, ruler_items;
+      crosshair_items = this.mouse_tracker.config_items();
+      ruler_items = this.border_rulers.config_items();
+      return [['crosshair', crosshair_items], ['ruler', ruler_items]];
+    };
+
     return JRule;
 
   })();

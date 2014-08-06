@@ -94,6 +94,11 @@ class JRule
           when 'crosshairs' then @mouse_tracker.config key, val
           when 'rulers' then @border_rulers.config key, val
 
+  config_items: ->
+    crosshair_items = @mouse_tracker.config_items()
+    ruler_items = @border_rulers.config_items()
+
+    [['crosshair', crosshair_items], ['ruler', ruler_items]]
 
 
 
