@@ -12,12 +12,26 @@ class JRule.Caliper
   constructor: (@opts={}) ->
     @mouse_tracker = JRule.MouseTracker.get_tracker()
     @crosshairs = []
+    @boxes = []
     @setup_events()
 
   setup_events: ->
     @events ||= []
 
+
     keydown = (e) =>
+      done = =>
+        @measuring = false
+        @end_pos = [@mouse_tracker.mousex, @mouse_tracker.mousey]
+        @last_size = [Math.abs(@end_pos[0] - @start_pos[0]), Math.abs(@end_pos[1] - @start_pos[1])]
+        JRule.Messenger.notify "#{@last_size[0]}x#{@last_size[1]}"
+        document.removeEventListener 'keyup', keyup_fn
+
+      keyup_fn = =>
+        done()
+        @cleanup()
+
+      # console.log e.keyCode
       if e.keyCode == 16 #shift
         @measuring = true
         @start_pos = [@mouse_tracker.mousex, @mouse_tracker.mousey]
@@ -25,24 +39,31 @@ class JRule.Caliper
         document.body.style.cursor = "none"
         @setup_indicators()
 
-        keyup_fn = =>
-          @measuring = false
-          @end_pos = [@mouse_tracker.mousex, @mouse_tracker.mousey]
-          @last_size = [Math.abs(@end_pos[0] - @start_pos[0]), Math.abs(@end_pos[1] - @start_pos[1])]
-          JRule.Messenger.notify "#{@last_size[0]}x#{@last_size[1]}"
-          document.removeEventListener 'keyup', keyup_fn
-          @cleanup()
-
         document.addEventListener 'keyup', keyup_fn
+
+      else if e.keyCode == 32 && @measuring
+        done()
+        @draw_box [@start_pos, @end_pos]
+        console.log "new box!", @start_pos, @end_pos
 
     @events.push { type: "keydown", fn: keydown }
 
     mousemove = =>
       @render()
 
-    @events.push { type: "jrule:mousemove", fn: mousemove }
+    onclick = (e) =>
+      if e.toElement.className == "jrule_caliper_box"
+        idx = e.toElement.dataset.index
+        if idx < @boxes.length
+          @boxes.splice idx, 1
 
-    underhand.add_events [{ type: "keydown", fn: keydown }]
+        document.body.removeChild e.toElement        
+
+    @events.push { type: "click", fn: onclick }
+
+    # @events.push { type: "jrule:mousemove", fn: mousemove }
+
+    underhand.add_events @events
     underhand.add_events [{ type: "jrule:mousemove", fn: mousemove }], document.body
 
 
@@ -84,16 +105,35 @@ class JRule.Caliper
       underhand.apply_styles @indicator_size, indicator_size_style
       underhand.set_text @indicator_size, "#{width}, #{height}"
 
-  setup_indicators: ->
-    indicator = document.createElement "div"
-    i_style =
+  #expects box to be an array of [start, end] where each are [x, y] coordinates
+  draw_box: (box) ->
+    x = Math.min(box[0][0], box[1][0])
+    y = Math.min(box[0][1], box[1][1])
+    width = Math.abs box[0][0] - box[1][0] # Math.max(box[0][0], box[1][0]) -  Math.min(box[0][0], box[0][1])
+    height = Math.abs box[0][1] - box[1][1] # Math.max(box[0][1], box[1][1]) -  Math.min(box[0][1], box[1][1])
+    new_box = @create_box x, y, width, height
+    console.log new_box
+    document.body.appendChild new_box
+    @boxes.push new_box 
+    @boxes[@boxes.length - 1].dataset.index = @boxes.length - 1
+
+  create_box: (x, y, width, height) ->
+    box = document.createElement "div"
+    box.className = "jrule_caliper_box"
+    style =
       position: "fixed"
-      left: "#{@start_pos[0]}px"
-      top: "#{@start_pos[1]}px"
+      left: "#{x}px"
+      top: "#{y}px"
+      width: "#{width}px"
+      height: "#{height}px"
       backgroundColor: "rgba(100, 100, 100, .4)"
       zIndex: JRule.zIndex
-    @indicator = indicator
-    underhand.apply_styles @indicator, i_style
+
+    underhand.apply_styles box, style
+    box
+
+  setup_indicators: ->
+    @indicator = @create_box @start_pos[0], @start_pos[1], 1, 1
     document.body.appendChild @indicator
 
     indicator_size = document.createElement "div"
@@ -139,3 +179,13 @@ class JRule.Caliper
 
     underhand.remove_events([{ type: "keydown", fn: keydown.fn }]) if keydown
     underhand.remove_events([{ type: "jrule:mousemove", fn: mousemove.fn }], document.body) if mousemove
+
+
+
+
+
+
+
+
+
+

@@ -764,30 +764,38 @@
       this.opts = opts != null ? opts : {};
       this.mouse_tracker = JRule.MouseTracker.get_tracker();
       this.crosshairs = [];
+      this.boxes = [];
       this.setup_events();
     }
 
     Caliper.prototype.setup_events = function() {
-      var keydown, mousemove;
+      var keydown, mousemove, onclick;
       this.events || (this.events = []);
       keydown = (function(_this) {
         return function(e) {
-          var keyup_fn;
+          var done, keyup_fn;
+          done = function() {
+            _this.measuring = false;
+            _this.end_pos = [_this.mouse_tracker.mousex, _this.mouse_tracker.mousey];
+            _this.last_size = [Math.abs(_this.end_pos[0] - _this.start_pos[0]), Math.abs(_this.end_pos[1] - _this.start_pos[1])];
+            JRule.Messenger.notify("" + _this.last_size[0] + "x" + _this.last_size[1]);
+            return document.removeEventListener('keyup', keyup_fn);
+          };
+          keyup_fn = function() {
+            done();
+            return _this.cleanup();
+          };
           if (e.keyCode === 16) {
             _this.measuring = true;
             _this.start_pos = [_this.mouse_tracker.mousex, _this.mouse_tracker.mousey];
             _this.mark_spot_with_crosshair(_this.start_pos);
             document.body.style.cursor = "none";
             _this.setup_indicators();
-            keyup_fn = function() {
-              _this.measuring = false;
-              _this.end_pos = [_this.mouse_tracker.mousex, _this.mouse_tracker.mousey];
-              _this.last_size = [Math.abs(_this.end_pos[0] - _this.start_pos[0]), Math.abs(_this.end_pos[1] - _this.start_pos[1])];
-              JRule.Messenger.notify("" + _this.last_size[0] + "x" + _this.last_size[1]);
-              document.removeEventListener('keyup', keyup_fn);
-              return _this.cleanup();
-            };
             return document.addEventListener('keyup', keyup_fn);
+          } else if (e.keyCode === 32 && _this.measuring) {
+            done();
+            _this.draw_box([_this.start_pos, _this.end_pos]);
+            return console.log("new box!", _this.start_pos, _this.end_pos);
           }
         };
       })(this);
@@ -800,16 +808,23 @@
           return _this.render();
         };
       })(this);
+      onclick = (function(_this) {
+        return function(e) {
+          var idx;
+          if (e.toElement.className === "jrule_caliper_box") {
+            idx = e.toElement.dataset.index;
+            if (idx < _this.boxes.length) {
+              _this.boxes.splice(idx, 1);
+            }
+            return document.body.removeChild(e.toElement);
+          }
+        };
+      })(this);
       this.events.push({
-        type: "jrule:mousemove",
-        fn: mousemove
+        type: "click",
+        fn: onclick
       });
-      underhand.add_events([
-        {
-          type: "keydown",
-          fn: keydown
-        }
-      ]);
+      underhand.add_events(this.events);
       return underhand.add_events([
         {
           type: "jrule:mousemove",
@@ -858,18 +873,39 @@
       }
     };
 
-    Caliper.prototype.setup_indicators = function() {
-      var i_style, indicator, indicator_size, is_style;
-      indicator = document.createElement("div");
-      i_style = {
+    Caliper.prototype.draw_box = function(box) {
+      var height, new_box, width, x, y;
+      x = Math.min(box[0][0], box[1][0]);
+      y = Math.min(box[0][1], box[1][1]);
+      width = Math.abs(box[0][0] - box[1][0]);
+      height = Math.abs(box[0][1] - box[1][1]);
+      new_box = this.create_box(x, y, width, height);
+      console.log(new_box);
+      document.body.appendChild(new_box);
+      this.boxes.push(new_box);
+      return this.boxes[this.boxes.length - 1].dataset.index = this.boxes.length - 1;
+    };
+
+    Caliper.prototype.create_box = function(x, y, width, height) {
+      var box, style;
+      box = document.createElement("div");
+      box.className = "jrule_caliper_box";
+      style = {
         position: "fixed",
-        left: "" + this.start_pos[0] + "px",
-        top: "" + this.start_pos[1] + "px",
+        left: "" + x + "px",
+        top: "" + y + "px",
+        width: "" + width + "px",
+        height: "" + height + "px",
         backgroundColor: "rgba(100, 100, 100, .4)",
         zIndex: JRule.zIndex
       };
-      this.indicator = indicator;
-      underhand.apply_styles(this.indicator, i_style);
+      underhand.apply_styles(box, style);
+      return box;
+    };
+
+    Caliper.prototype.setup_indicators = function() {
+      var indicator_size, is_style;
+      this.indicator = this.create_box(this.start_pos[0], this.start_pos[1], 1, 1);
       document.body.appendChild(this.indicator);
       indicator_size = document.createElement("div");
       is_style = {
@@ -1639,7 +1675,7 @@
 
     Help.prototype.default_opts = function() {
       var content;
-      content = "Welcome to JRule! Thanks for using it. <br><br> JRule helps you measure and line things up. It's simple to use, here are some controls: <br> Press 'c' to toggle the Crosshairs<br> Press 'g' to toggle the Grid<br> Press 'r' to toggle the Rulers<br> Hold 'shift' and move the mouse to Measure<br> Press 'h' to see this message again<br> Click this message to get rid of it<br> Press 'escape' to remove JRule when you're done<br>";
+      content = "Welcome to JRule! Thanks for using it. <br><br> JRule helps you measure and line things up. It's simple to use, here are some controls: <br> Press 'c' to toggle the Crosshairs<br> Press 'g' to toggle the Grid<br> Press 'r' to toggle the Rulers<br> Hold 'shift' and move the mouse to Measure<br> Press 'h' to see this message again<br> Press 'm' to toggle messages on/off Click this message to get rid of it<br> Press 'escape' to remove JRule when you're done<br>";
       return underhand.extend(Help.__super__.default_opts.apply(this, arguments), {
         html_content: content,
         is_flash: false,
