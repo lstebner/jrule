@@ -187,16 +187,18 @@ class JRule.Caliper
     document.body.style.cursor = "default"
 
   destroy: ->
-    keydown = null
     mousemove = null
 
     for e in @events
-      keydown = e if e.type == "keydown"
       mousemove = e if e.type == "jrule:mousemove"
 
-    underhand.remove_events([{ type: "keydown", fn: keydown.fn }]) if keydown
+    underhand.remove_events @events
     underhand.remove_events([{ type: "jrule:mousemove", fn: mousemove.fn }], document.body) if mousemove
 
+    for b in @boxes
+      document.body.removeChild b
+
+    @boxes = []
 
 
 

@@ -971,35 +971,30 @@
     };
 
     Caliper.prototype.destroy = function() {
-      var e, keydown, mousemove, _i, _len, _ref;
-      keydown = null;
+      var b, e, mousemove, _i, _j, _len, _len1, _ref, _ref1;
       mousemove = null;
       _ref = this.events;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         e = _ref[_i];
-        if (e.type === "keydown") {
-          keydown = e;
-        }
         if (e.type === "jrule:mousemove") {
           mousemove = e;
         }
       }
-      if (keydown) {
-        underhand.remove_events([
-          {
-            type: "keydown",
-            fn: keydown.fn
-          }
-        ]);
-      }
+      underhand.remove_events(this.events);
       if (mousemove) {
-        return underhand.remove_events([
+        underhand.remove_events([
           {
             type: "jrule:mousemove",
             fn: mousemove.fn
           }
         ], document.body);
       }
+      _ref1 = this.boxes;
+      for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+        b = _ref1[_j];
+        document.body.removeChild(b);
+      }
+      return this.boxes = [];
     };
 
     return Caliper;
