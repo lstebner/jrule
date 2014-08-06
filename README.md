@@ -34,7 +34,35 @@ If you want to toggle the crosshairs, simply pop open the console and type `docu
 
 ## Config
 
-JRule will be highly configurable at some point, but is still in very early development so none of the options are exposed yet. 
+I've begun exposing some configuration options for convenience and I'll try to keep this updated as I do more. Though there is currently no UI to do this (it seems a bit heavy to add one), you should use the console built into your browser for all these commands. If you don't know what that is, try Googling it.
+
+To access the instantiated JRule object
+```javascript
+document.jruler
+```
+
+To access the JRule class itself
+```javascript
+document.JRule
+```
+
+All JRule configuration options are accessible through the `document.jruler` element above, through the `config` method, which can be used like..
+
+```javascript
+document.jruler.config('crosshairs', {  
+    crosshair_size: "15px", 
+    crosshair_color: "#ff9" 
+})
+```
+
+The first parameter is "what" you want to configure and the second parameter is the options and their values. You can configure multiple things at once and this must always be an object. 
+
+The available "what" values are `crosshairs` and `rulers`. 
+
+The available config options for each are
+
+- crosshairs: ['crosshair_size', 'crosshair_color']
+- rulers: ['divisions', 'tick_distance', 'show_mouse', 'show_labels']
 
 ## Bookmarklet
 
