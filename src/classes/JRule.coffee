@@ -5,7 +5,7 @@
 
 class JRule
   @talkative: 1
-  @version: .5
+  @version: .6
   @zIndex: 999999
 
   constructor: (@opts={}) ->
