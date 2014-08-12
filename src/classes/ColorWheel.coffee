@@ -13,6 +13,9 @@ class JRule.ColorWheel
     
   # Convert rgb values to their hex equivelant
   @rgb_to_hex: (r=0, g=0, b=0) ->
+    if typeof r == "string"
+      return @rgb_string_to_hex r
+
     #this just makes sure that hex values are 0 padded when they are low
     convert = (i) ->
       i = i.toString(16)

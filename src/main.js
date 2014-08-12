@@ -363,6 +363,9 @@
       if (b == null) {
         b = 0;
       }
+      if (typeof r === "string") {
+        return this.rgb_string_to_hex(r);
+      }
       convert = function(i) {
         i = i.toString(16);
         if (i.length === 1) {
