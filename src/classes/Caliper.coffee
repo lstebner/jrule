@@ -20,11 +20,11 @@ class JRule.Caliper
 
 
     keydown = (e) =>
-      done = =>
+      done = (notify=true) =>
         @measuring = false
         @end_pos = [@mouse_tracker.mousex, @mouse_tracker.mousey]
         @last_size = [Math.abs(@end_pos[0] - @start_pos[0]), Math.abs(@end_pos[1] - @start_pos[1])]
-        JRule.Messenger.notify "#{@last_size[0]}x#{@last_size[1]}"
+        JRule.Messenger.notify "#{@last_size[0]}x#{@last_size[1]}" if notify
         document.removeEventListener 'keyup', keyup_fn
 
       keyup_fn = =>
@@ -41,11 +41,10 @@ class JRule.Caliper
 
         document.addEventListener 'keyup', keyup_fn
 
-      else if e.keyCode == 32 && @measuring
+      else if e.keyCode == 32 && @measuring #space
         e.preventDefault()
-        done()
+        done(false)
         @draw_box [@start_pos, @end_pos]
-        console.log "new box!", @start_pos, @end_pos
 
     @events.push { type: "keydown", fn: keydown }
 
