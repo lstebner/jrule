@@ -416,6 +416,36 @@
       return this.hex_to_rgb(hex) + (", " + a);
     };
 
+    ColorWheel.is_hex_valid = function(hex_string, require_hash) {
+      if (require_hash == null) {
+        require_hash = false;
+      }
+      if (require_hash) {
+        return /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(hex_string);
+      } else {
+        return /(^[0-9A-F]{6}$)|(^[0-9A-F]{3}$)/i.test(hex_string);
+      }
+    };
+
+    ColorWheel.is_rgb_valid = function(rgb_string) {
+      var num, pieces, val, _i, _len;
+      pieces = rgb_string.split(",");
+      if (pieces.length !== 3) {
+        return false;
+      }
+      for (_i = 0, _len = pieces.length; _i < _len; _i++) {
+        num = pieces[_i];
+        if (parseInt(num).toString() === "NaN") {
+          return false;
+        }
+        val = parseInt(num);
+        if (num > 255) {
+          return false;
+        }
+      }
+      return true;
+    };
+
     return ColorWheel;
 
   })();
@@ -478,6 +508,124 @@
     };
 
     return Color;
+
+  })();
+
+  JRule.ColorWheel.UI = (function() {
+    function UI(opts) {
+      this.opts = opts != null ? opts : {};
+      this.default_opts();
+      this.setup();
+    }
+
+    UI.prototype.default_opts = function() {
+      return underhand.extend({}, this.opts);
+    };
+
+    UI.prototype.setup = function() {
+      var d, form, hex_label, rgb_label, style, swatch_style;
+      d = document.createElement("div");
+      style = {
+        position: "fixed",
+        top: "50%",
+        left: "50%",
+        width: "500px",
+        height: "260px",
+        marginLeft: "-250px",
+        marginTop: "-130px",
+        border: "1px solid #333",
+        backgroundColor: "#fff",
+        padding: "25px"
+      };
+      underhand.apply_styles(d, style);
+      this.container = d;
+      document.body.appendChild(this.container);
+      form = document.createElement("form");
+      hex_label = document.createElement("label");
+      underhand.set_text(hex_label, "Hex");
+      this.hex_input = document.createElement("input");
+      this.hex_input.setAttribute("name", "hex_value");
+      hex_label.appendChild(this.hex_input);
+      form.appendChild(hex_label);
+      rgb_label = document.createElement("label");
+      underhand.set_text(rgb_label, "RGB");
+      this.rgb_input = document.createElement("input");
+      this.rgb_input.setAttribute("name", "rgb_value");
+      rgb_label.appendChild(this.rgb_input);
+      form.appendChild(rgb_label);
+      this.swatch = document.createElement("swatch");
+      swatch_style = {
+        display: "inline-block",
+        width: "32px",
+        height: "32px"
+      };
+      underhand.apply_styles(this.swatch, swatch_style);
+      form.appendChild(this.swatch);
+      this.form = form;
+      this.container.appendChild(this.form);
+      return this.setup_events();
+    };
+
+    UI.prototype.destroy = function() {
+      return underhand.remove_events(this.events, this.container);
+    };
+
+    UI.prototype.setup_events = function() {
+      var keyup;
+      this.events || (this.events = []);
+      keyup = (function(_this) {
+        return function(e) {
+          if (e.target.nodeName.toLowerCase() === "input") {
+            return _this.read_form(e.target.name);
+          }
+        };
+      })(this);
+      this.events.push({
+        type: "keyup",
+        fn: keyup
+      });
+      return underhand.add_events(this.events, this.container);
+    };
+
+    UI.prototype.read_form = function(from) {
+      if (from == null) {
+        from = 'hex_value';
+      }
+      if (from === 'hex_value' && this.is_hex_valid()) {
+        this.color = new JRule.Color("#" + (this.hex_value()));
+        this.rgb_input.value = this.color.rgb();
+        return this.color_swatch();
+      } else if (from === "rgb_value" && this.is_rgb_valid()) {
+        this.color = new JRule.Color(this.rgb_value());
+        this.hex_input.value = this.color.hex();
+        return this.color_swatch();
+      }
+    };
+
+    UI.prototype.is_hex_valid = function() {
+      return JRule.ColorWheel.is_hex_valid(this.hex_value());
+    };
+
+    UI.prototype.is_rgb_valid = function() {
+      return JRule.ColorWheel.is_rgb_valid(this.rgb_value());
+    };
+
+    UI.prototype.hex_value = function() {
+      return this.hex_input.value;
+    };
+
+    UI.prototype.rgb_value = function() {
+      return this.rgb_input.value;
+    };
+
+    UI.prototype.color_swatch = function() {
+      if (!this.color) {
+        return;
+      }
+      return this.swatch.style.backgroundColor = this.color.style();
+    };
+
+    return UI;
 
   })();
 
